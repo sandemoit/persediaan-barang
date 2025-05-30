@@ -17,6 +17,11 @@
                             <ul class="nk-block-tools g-3">
                                 <li>
                                     <div class="dropdown">
+                                        <a href="#unduh-surat" data-bs-toggle="modal" class="btn btn-icon btn-warning"><em class="icon ni ni-file"></em> Unduh Surat </a>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="dropdown">
                                         <a href="<?= site_url('pelanggan') ?>" class="btn btn-icon btn-info"><em class="icon ni ni-plus"></em>Add Pelanggan</a>
                                     </div>
                                 </li>
@@ -136,6 +141,80 @@
     </div>
 </div>
 <!-- content @e -->
+
+<!-- Modal Unduh Surat -->
+<div class="modal fade" tabindex="-1" id="unduh-surat">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <a href="#" class="close" data-bs-dismiss="modal" aria-label="Close">
+                <em class="icon ni ni-cross"></em>
+            </a>
+            <div class="modal-header">
+                <h5 class="modal-title">Unduh Surat Keluar</h5>
+            </div>
+            <form role="form" method="post" action="#">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <div class="form-group">
+                            <label class="form-label">Berdasarkan</label>
+                            <div class="form-control-wrap">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="berdasarkan" id="surat_jalan" value="option1">
+                                    <label class="form-check-label" for="surat_jalan">Surat Jalan</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="berdasarkan" id="rentang_tanggal" value="option2">
+                                    <label class="form-check-label" for="rentang_tanggal">Rentang Tanggal</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-control-wrap">
+                                    <label class="form-label" for="no_surat">No Surat</label>
+                                    <div class="input-group">
+                                        <select name="" id="" class="form-select">
+                                            <option selected disabled>Pilih Nor Surat</option>
+                                            <?php foreach ($surat as $s): ?>
+                                                <option value="<?= $s['no_surat'] ?>"><?= $s['no_surat'] ?></option>
+                                            <?php endforeach ?>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="form-control-wrap">
+                                    <label class="form-label" for="no_surat">Tanggal Awal</label>
+                                    <div class="input-group">
+                                        <input type="date" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="form-control-wrap">
+                                    <label class="form-label" for="no_surat">Tanggal Awal</label>
+                                    <div class="input-group">
+                                        <input type="date" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <ul class="align-center flex-wrap flex-sm-nowrap gx-4 gy-2">
+                        <li>
+                            <button class="btn btn-primary" data-bs-dismiss="modal">Unduh</button>
+                        </li>
+                        <li>
+                            <a href="#" class="link" data-bs-dismiss="modal">Cancel</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <!-- Modal Content Code -->
 <form role="form" id="myform" method="post" action="<?= site_url('pelanggan/trx') ?>">
