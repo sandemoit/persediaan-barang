@@ -110,7 +110,7 @@ class Pelanggan extends CI_Controller
 
         $data['pelanggan'] = $this->pelanggan->get('pelanggan');
         $data['barang'] = $this->db->get('barang')->result_array();
-        $this->db->select('no_surat');
+        $this->db->select('no_surat, MIN(tanggal_keluar) as tanggal_keluar');
         $this->db->group_by('no_surat');
         $data['surat'] = $this->db->get('barang_keluar')->result_array();
 

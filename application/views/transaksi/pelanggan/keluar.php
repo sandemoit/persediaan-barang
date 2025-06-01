@@ -160,7 +160,7 @@
                                     <select name="no_surat" id="no_surat_select" class="form-select">
                                         <option selected disabled value="">Pilih No Surat</option>
                                         <?php foreach ($surat as $s): ?>
-                                            <option value="<?= $s['no_surat'] ?>"><?= $s['no_surat'] ?></option>
+                                            <option value="<?= $s['no_surat'] ?>"><?= $s['no_surat'] . ' | ' . $s['tanggal_keluar'] ?></option>
                                         <?php endforeach ?>
                                     </select>
                                 </div>
