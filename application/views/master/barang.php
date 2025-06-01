@@ -91,15 +91,18 @@
                                                     <th>Nama Barang</th>
                                                     <th>Jenis Barang</th>
                                                     <th>Satuan</th>
-                                                    <th>Stok Awal</th>
+                                                    <!-- <th>Stok Awal</th> -->
                                                     <th>Stok</th>
                                                     <th>Kondisi</th>
                                                     <th>Harga</th>
+                                                    <th>Total Harga</th>
                                                     <th>Aksi</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <?php $no = 1; ?>
+                                                <?php $no = 1;
+                                                $harga = 0;
+                                                ?>
                                                 <?php foreach ($barang as $s) : ?>
                                                     <tr>
                                                         <td><?= $no++; ?></td>
@@ -108,10 +111,11 @@
                                                         <td><?= $s['nama_barang'] ?></td>
                                                         <td><?= $s['nama_jenis'] ?></td>
                                                         <td><?= $s['nama_satuan'] ?></td>
-                                                        <td><?= $s['stok_awal'] ?? '0' ?></td>
+                                                        <!-- <td><?= $s['stok_awal'] ?? '0' ?></td> -->
                                                         <td><?= $s['stok'] ?? '0' ?></td>
                                                         <td><?= $s['kondisi'] ?></td>
                                                         <td><?= number_format($s['harga'] ?? 0, 0, ',', '.') ?></td>
+                                                        <td><?= number_format($s['harga'] * $s['stok'] ?? 0, 0, ',', '.') ?></td>
                                                         <td>
                                                             <div class="dropdown">
                                                                 <a href="#" class="dropdown-toggle btn btn-icon btn-trigger" data-bs-toggle="dropdown"><em class="icon ni ni-more-h"></em></a>
@@ -161,7 +165,7 @@
                     <div class="col-lg-4 col-md-12">
                         <div class="form-group">
                             <label class="form-label" for="room-no-add">Kode Barang</label>
-                            <input type="text" class="form-control" name="kode_barang" id="kode_barang" value="<?= $kode_barang ?>" readonly>
+                            <input type="text" class="form-control" name="kode_barang" id="kode_barang" placeholder="Masukan 20 digit kode barang">
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-12">

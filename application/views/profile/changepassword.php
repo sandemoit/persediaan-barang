@@ -79,7 +79,7 @@
                                         <ul class="link-list-menu">
                                             <li><a href="<?= site_url('profile') ?>"><em class="icon ni ni-user-fill-c"></em><span>Informasi Pribadi</span></a></li>
                                             <!-- <li><a href="html/user-profile-notification.html"><em class="icon ni ni-bell-fill"></em><span>Notifications</span></a></li> -->
-                                            <li><a href="javascript:;"><em class="icon ni ni-activity-round-fill"></em><span>Account Activity</span></a></li>
+                                            <!-- <li><a href="javascript:;"><em class="icon ni ni-activity-round-fill"></em><span>Account Activity</span></a></li> -->
                                             <li><a class="active" href="<?= site_url('profile/changepassword') ?>"><em class="icon ni ni-lock-alt-fill"></em><span>Pengaturan keamanan</span></a></li>
                                         </ul>
                                     </div><!-- .card-inner -->

@@ -152,66 +152,69 @@
             <div class="modal-header">
                 <h5 class="modal-title">Unduh Surat Keluar</h5>
             </div>
-            <form role="form" method="post" action="#">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <div class="form-group">
-                            <label class="form-label">Berdasarkan</label>
+            <div class="modal-body">
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-6">
                             <div class="form-control-wrap">
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="berdasarkan" id="surat_jalan" value="option1">
-                                    <label class="form-check-label" for="surat_jalan">Surat Jalan</label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="berdasarkan" id="rentang_tanggal" value="option2">
-                                    <label class="form-check-label" for="rentang_tanggal">Rentang Tanggal</label>
+                                <label class="form-label" for="no_surat_select">No Surat</label>
+                                <div class="input-group">
+                                    <select name="no_surat" id="no_surat_select" class="form-select">
+                                        <option selected disabled value="">Pilih No Surat</option>
+                                        <?php foreach ($surat as $s): ?>
+                                            <option value="<?= $s['no_surat'] ?>"><?= $s['no_surat'] ?></option>
+                                        <?php endforeach ?>
+                                    </select>
                                 </div>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-6">
-                                <div class="form-control-wrap">
-                                    <label class="form-label" for="no_surat">No Surat</label>
-                                    <div class="input-group">
-                                        <select name="" id="" class="form-select">
-                                            <option selected disabled>Pilih Nor Surat</option>
-                                            <?php foreach ($surat as $s): ?>
-                                                <option value="<?= $s['no_surat'] ?>"><?= $s['no_surat'] ?></option>
-                                            <?php endforeach ?>
-                                        </select>
-                                    </div>
+                        <div class="col-3">
+                            <div class="form-control-wrap">
+                                <label class="form-label" for="tanggal_awal">Tanggal Awal</label>
+                                <div class="input-group">
+                                    <input type="date" class="form-control" id="tanggal_awal" name="tanggal_awal">
                                 </div>
                             </div>
-                            <div class="col-3">
-                                <div class="form-control-wrap">
-                                    <label class="form-label" for="no_surat">Tanggal Awal</label>
-                                    <div class="input-group">
-                                        <input type="date" class="form-control">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-3">
-                                <div class="form-control-wrap">
-                                    <label class="form-label" for="no_surat">Tanggal Awal</label>
-                                    <div class="input-group">
-                                        <input type="date" class="form-control">
-                                    </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-control-wrap">
+                                <label class="form-label" for="tanggal_akhir">Tanggal Akhir</label>
+                                <div class="input-group">
+                                    <input type="date" class="form-control" id="tanggal_akhir" name="tanggal_akhir">
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Info text -->
+                    <div class="alert alert-info mt-3">
+                        <strong>Cara Penggunaan:</strong><br>
+                        • <strong>Berdasarkan No Surat + Tanggal Hari Ini:</strong> Pilih No Surat saja (tanggal akan otomatis hari ini)<br>
+                        • <strong>Berdasarkan No Surat + Rentang Tanggal:</strong> Pilih No Surat dan isi kedua tanggal<br>
+                    </div>
                 </div>
-                <div class="modal-footer bg-light">
-                    <ul class="align-center flex-wrap flex-sm-nowrap gx-4 gy-2">
-                        <li>
-                            <button class="btn btn-primary" data-bs-dismiss="modal">Unduh</button>
-                        </li>
-                        <li>
-                            <a href="#" class="link" data-bs-dismiss="modal">Cancel</a>
-                        </li>
-                    </ul>
+
+                <!-- Progress indicator -->
+                <div id="downloadProgress" class="mt-3" style="display: none;">
+                    <div class="d-flex align-items-center">
+                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                        <span>Sedang memproses unduhan...</span>
+                    </div>
                 </div>
-            </form>
+
+                <!-- Success/Error messages -->
+                <div id="alertContainer" class="mt-3"></div>
+            </div>
+            <div class="modal-footer bg-light">
+                <ul class="align-center flex-wrap flex-sm-nowrap gx-4 gy-2">
+                    <li>
+                        <button class="btn btn-primary" id="downloadBtn" disabled>Unduh</button>
+                    </li>
+                    <li>
+                        <a href="#" class="link" data-bs-dismiss="modal">Cancel</a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 </div>
@@ -232,7 +235,7 @@
                 </div>
                 <div class="modal-body">
                     <p>No. Surat Jalan: <?= $no_surat; ?></p>
-                    <input type="hidden" id="no_surat" value="<?= $no_surat; ?>">
+                    <input type="hidden" id="no_surat_keluar" value="<?= $no_surat; ?>">
                     <div class="row">
                         <div class="col-lg-6 col-md-12 col-sm-12">
                             <div class="form-group">
@@ -329,6 +332,183 @@
     </div>
 </form>
 
+<!-- js unduh surat -->
+<script>
+    $(document).ready(function() {
+        // Elements
+        const $noSuratSelect = $('#no_surat_select');
+        const $tanggalAwal = $('#tanggal_awal');
+        const $tanggalAkhir = $('#tanggal_akhir');
+        const $downloadBtn = $('#downloadBtn');
+        const $downloadProgress = $('#downloadProgress');
+        const $alertContainer = $('#alertContainer');
+
+        // Set default dates to today
+        const today = new Date().toISOString().split('T')[0];
+
+        // Reset form when modal opens
+        $('#unduh-surat').on('show.bs.modal', function() {
+            resetForm();
+        });
+
+        // Handle input changes for validation
+        $noSuratSelect.on('change', checkFormValidation);
+        $tanggalAwal.on('change', checkFormValidation);
+        $tanggalAkhir.on('change', checkFormValidation);
+
+        // Handle download button click
+        $downloadBtn.on('click', function() {
+            const noSurat = $noSuratSelect.val();
+            const tanggalAwal = $tanggalAwal.val();
+            const tanggalAkhir = $tanggalAkhir.val();
+
+            // Validate inputs
+            if (!noSurat && (!tanggalAwal || !tanggalAkhir)) {
+                showAlert('Pilih No Surat atau isi rentang tanggal untuk mengunduh.', 'warning');
+                return;
+            }
+
+            // Validate date range if both dates are filled
+            if (tanggalAwal && tanggalAkhir && new Date(tanggalAwal) > new Date(tanggalAkhir)) {
+                showAlert('Tanggal awal tidak boleh lebih besar dari tanggal akhir.', 'warning');
+                return;
+            }
+
+            // Prepare request data
+            let requestData = {};
+
+            if (noSurat) {
+                requestData.no_surat = noSurat;
+
+                // If no dates provided, use today's date
+                if (!tanggalAwal || !tanggalAkhir) {
+                    requestData.tanggal_awal = today;
+                    requestData.tanggal_akhir = today;
+                    requestData.berdasarkan = 'surat_jalan_hari_ini';
+                } else {
+                    requestData.tanggal_awal = tanggalAwal;
+                    requestData.tanggal_akhir = tanggalAkhir;
+                    requestData.berdasarkan = 'surat_jalan_rentang';
+                }
+            } else {
+                // Only date range
+                requestData.tanggal_awal = tanggalAwal;
+                requestData.tanggal_akhir = tanggalAkhir;
+                requestData.berdasarkan = 'rentang_tanggal';
+            }
+
+            startDownload(requestData);
+        });
+
+        function checkFormValidation() {
+            const noSurat = $noSuratSelect.val();
+            const tanggalAwal = $tanggalAwal.val();
+            const tanggalAkhir = $tanggalAkhir.val();
+
+            // Enable button if:
+            // 1. No Surat is selected (dates are optional)
+            // 2. OR both dates are filled (No Surat is optional)
+            const isValid = noSurat || (tanggalAwal && tanggalAkhir);
+
+            $downloadBtn.prop('disabled', !isValid);
+            clearAlerts();
+        }
+
+        function resetForm() {
+            $noSuratSelect.val('');
+            $tanggalAwal.val(today);
+            $tanggalAkhir.val(today);
+            $downloadBtn.prop('disabled', true);
+            clearAlerts();
+        }
+
+        function startDownload(data) {
+            $downloadBtn.prop('disabled', true);
+            $downloadProgress.show();
+            clearAlerts();
+
+            $.ajax({
+                url: '<?= base_url('keluar/unduhSurat') ?>',
+                type: 'POST',
+                data: data,
+                dataType: 'json',
+                timeout: 30000, // 30 seconds timeout
+                success: function(response) {
+                    $downloadProgress.hide();
+
+                    if (response && response.success) {
+                        if (response.download_url) {
+                            // Create temporary link to download file
+                            const link = document.createElement('a');
+                            link.href = response.download_url;
+                            link.download = response.filename || 'surat-keluar.pdf';
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                        }
+
+                        showAlert(response.message + (response.file_size ? ' (Ukuran: ' + response.file_size + ')' : ''), 'success');
+                        resetFormAfterDownload();
+                    } else {
+                        showAlert(response.message || 'Terjadi kesalahan saat mengunduh file.', 'danger');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error Details:', {
+                        status: status,
+                        error: error,
+                        responseText: xhr.responseText,
+                        statusCode: xhr.status
+                    });
+
+                    $downloadProgress.hide();
+
+                    let errorMessage = 'Terjadi kesalahan pada server.';
+
+                    if (xhr.responseText) {
+                        try {
+                            const errorResponse = JSON.parse(xhr.responseText);
+                            if (errorResponse.message) {
+                                errorMessage = errorResponse.message;
+                            }
+                        } catch (e) {
+                            console.error('Failed to parse error response:', e);
+                            errorMessage += ' Detail: ' + xhr.responseText.substring(0, 100);
+                        }
+                    }
+
+                    showAlert(errorMessage, 'danger');
+                },
+                complete: function() {
+                    checkFormValidation();
+                }
+            });
+        }
+
+        function resetFormAfterDownload() {
+            $noSuratSelect.val('');
+            // Keep today's date as default
+            $tanggalAwal.val(today);
+            $tanggalAkhir.val(today);
+            checkFormValidation();
+        }
+
+        function showAlert(message, type) {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            $alertContainer.html(alertHtml);
+        }
+
+        function clearAlerts() {
+            $alertContainer.empty();
+        }
+    });
+</script>
+
 <script>
     $(document).ready(function() {
         // Initialize Select2
@@ -344,10 +524,10 @@
             var jum = parseInt($("#jumlah_keluar").val());
             var iduser = $("#id_user").val();
             var tgl = $("#tanggal_keluar").val();
-            var nosurat = $('#no_surat').val();
+            var nosurat = $('#no_surat_keluar').val();
 
             // Debugging - cek nilai yang didapat
-            // console.log(brg);
+            // console.log(nosurat);
 
             // Validasi input
             if (!plg) {

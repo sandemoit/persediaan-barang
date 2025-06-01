@@ -82,7 +82,7 @@
                                 </div>
                             </div><!-- .card -->
                         </div><!-- .col -->
-                        <div class="col-lg-12">
+                        <!-- <div class="col-lg-12">
                             <div class="card card-bordered card-full">
                                 <div class="nk-block">
                                     <div class="card card-bordered card-stretch">
@@ -115,12 +115,12 @@
                                                         </tbody>
                                                     </table>
                                                 </div>
-                                            </div><!-- .card-preview -->
-                                        </div> <!-- nk-block -->
-                                    </div><!-- .card-inner-group -->
-                                </div><!-- .card -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div
                             </div>
-                        </div><!-- .col -->
+                        </div> -->
 
                     </div><!-- .row -->
                 </div><!-- .nk-block -->

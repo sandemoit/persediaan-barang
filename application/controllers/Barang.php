@@ -48,6 +48,12 @@ class Barang extends CI_Controller
         $number = str_pad($kode_tambah, 4, '0', STR_PAD_LEFT);
         $data['kode_barang'] = 'FS-' . $number;
 
+        $this->form_validation->set_rules('nama_barang', 'Nama Barang', 'required|trim');
+        $this->form_validation->set_rules('kode_barang', 'Kode Barang', 'required');
+        $this->form_validation->set_rules('id_jenis', 'Jenis Barang', 'required');
+        $this->form_validation->set_rules('id_satuan', 'Satuan Barang', 'required');
+        $this->form_validation->set_rules('id_supplier', 'Satuan Supplier', 'required');
+
         if ($this->form_validation->run() == false) {
             $this->load->view('template/header', $data);
             $this->load->view('template/sidebar');
@@ -55,17 +61,11 @@ class Barang extends CI_Controller
             $this->load->view('master/barang', $data);
             $this->load->view('template/footer', $data);
         } else {
-            $this->form_validation->set_rules('nama_barang', 'Nama Barang', 'required|trim');
-            $this->form_validation->set_rules('kode_barang', 'Kode Barang', 'required');
-            $this->form_validation->set_rules('id_jenis', 'Jenis Barang', 'required');
-            $this->form_validation->set_rules('id_satuan', 'Satuan Barang', 'required');
-            $this->form_validation->set_rules('id_supplier', 'Satuan Supplier', 'required');
-
             $input_data = [
                 'kode_barang' => $this->input->post('kode_barang', true),
                 'nama_barang' => $this->input->post('nama_barang', true),
-                'kondisi' => $this->input->post('kondisi_barang', true),
-                'harga' => $this->input->post('harga_', true),
+                'kondisi' => $this->input->post('kondisi', true),
+                'harga' => $this->input->post('harga', true),
                 'stok_awal' => $this->input->post('stok_awal', true),
                 'stok' => $this->input->post('stok_awal', true),
                 'id_jenis' => $this->input->post('id_jenis', true),

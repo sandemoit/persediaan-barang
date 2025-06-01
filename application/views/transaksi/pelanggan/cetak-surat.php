@@ -27,6 +27,8 @@
             max-width: 800px;
             margin: 0 auto;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
         }
 
         .card-header {
@@ -208,7 +210,7 @@
                 <div class="doc-number">No. TT/2505/003</div>
             </div>
             <div class="recipient-info">
-                <strong>Tanggal:</strong> 2-May-2025<br />
+                <strong>Tanggal:</strong> <?= $generated_date ?><br />
                 <strong>Kepada:</strong> KD3 - PT. Tunas Cahaya Kirana<br />
                 <strong>Alamat:</strong> Jl. Siliwangi, KP. Rawa Panjang No. 110A<br />
                 RT 002 RW 004, Sepanjang Jaya, Rawalumbu, Bekasi - Jawa Barat
@@ -225,137 +227,28 @@
                     <th>NO.</th>
                     <th>KODE BARANG</th>
                     <th>NAMA BARANG</th>
-                    <th>PAKET</th>
-                    <th>NAMA SISWA</th>
                     <th>JUMLAH</th>
+                    <th>TANGGAL</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- Akhtara Ihsan -->
-                <tr class="student-group">
-                    <td>166</td>
-                    <td>UF-BTK06</td>
-                    <td>Kemeja Batik No.12</td>
-                    <td>PAKET PRIMARY (SD)</td>
-                    <td>Akhtara Ihsan</td>
-                    <td>1 PCS</td>
-                </tr>
-                <tr class="student-group">
-                    <td>167</td>
-                    <td>UF-KTK06</td>
-                    <td>Kemeja Kotak KF No.12</td>
-                    <td>PAKET PRIMARY (SD)</td>
-                    <td>Akhtara Ihsan</td>
-                    <td>1 PCS</td>
-                </tr>
-                <tr class="student-group">
-                    <td>168</td>
-                    <td>UF-CLN05</td>
-                    <td>Celana Dongker KF No.10</td>
-                    <td>PAKET PRIMARY (SD)</td>
-                    <td>Akhtara Ihsan</td>
-                    <td>2 PCS</td>
-                </tr>
-                <tr class="student-group">
-                    <td>169</td>
-                    <td>UF-PE05</td>
-                    <td>Seragam PE Putih KF No.10</td>
-                    <td>PAKET PRIMARY (SD)</td>
-                    <td>Akhtara Ihsan</td>
-                    <td>1 STEL</td>
-                </tr>
-                <tr class="student-group">
-                    <td>170</td>
-                    <td>UF-PTH02</td>
-                    <td>Kemeja Putih KF No.12</td>
-                    <td>PAKET PRIMARY (SD)</td>
-                    <td>Akhtara Ihsan</td>
-                    <td>1 PCS</td>
-                </tr>
-
-                <!-- Rhaegan Ramadhan -->
-                <tr>
-                    <td>171</td>
-                    <td>UF-BTK05</td>
-                    <td>Kemeja Batik No.10</td>
-                    <td>PAKET PRIMARY (SD)</td>
-                    <td>Rhaegan Ramadhan</td>
-                    <td>1 PCS</td>
-                </tr>
-                <tr>
-                    <td>172</td>
-                    <td>UF-KTK06</td>
-                    <td>Kemeja Kotak KF No.10</td>
-                    <td>PAKET PRIMARY (SD)</td>
-                    <td>Rhaegan Ramadhan</td>
-                    <td>1 PCS</td>
-                </tr>
-                <tr>
-                    <td>173</td>
-                    <td>UF-CLN05</td>
-                    <td>Celana Dongker KF No.10</td>
-                    <td>PAKET PRIMARY (SD)</td>
-                    <td>Rhaegan Ramadhan</td>
-                    <td>2 PCS</td>
-                </tr>
-                <tr>
-                    <td>174</td>
-                    <td>UF-PE04</td>
-                    <td>Seragam PE Putih KF No.8</td>
-                    <td>PAKET PRIMARY (SD)</td>
-                    <td>Rhaegan Ramadhan</td>
-                    <td>1 STEL</td>
-                </tr>
-                <tr>
-                    <td>175</td>
-                    <td>UF-PTH01</td>
-                    <td>Kemeja Putih KF No.10</td>
-                    <td>PAKET PRIMARY (SD)</td>
-                    <td>Rhaegan Ramadhan</td>
-                    <td>1 PCS</td>
-                </tr>
-
-                <!-- Kenneth Diramoti -->
-                <tr class="student-group">
-                    <td>176</td>
-                    <td>UF-BTK06</td>
-                    <td>Kemeja Batik No.16</td>
-                    <td>PAKET PRIMARY (SD)</td>
-                    <td>Kenneth Diramoti</td>
-                    <td>1 PCS</td>
-                </tr>
-                <tr class="student-group">
-                    <td>177</td>
-                    <td>UF-KTK08</td>
-                    <td>Kemeja Kotak KF No.16</td>
-                    <td>PAKET PRIMARY (SD)</td>
-                    <td>Kenneth Diramoti</td>
-                    <td>1 PCS</td>
-                </tr>
-                <tr class="student-group">
-                    <td>178</td>
-                    <td>UF-CLN06</td>
-                    <td>Celana Dongker KF No.16</td>
-                    <td>PAKET PRIMARY (SD)</td>
-                    <td>Kenneth Diramoti</td>
-                    <td>2 PCS</td>
-                </tr>
-                <tr class="student-group">
-                    <td>179</td>
-                    <td>UF-PE07</td>
-                    <td>Seragam PE Putih KF No.14</td>
-                    <td>PAKET PRIMARY (SD)</td>
-                    <td>Kenneth Diramoti</td>
-                    <td>1 STEL</td>
-                </tr>
-                <tr class="student-group">
-                    <td>180</td>
-                    <td>UF-PTH04</td>
-                    <td>Kemeja Putih KF No.16</td>
-                    <td>PAKET PRIMARY (SD)</td>
-                    <td>Kenneth Diramoti</td>
-                    <td>1 PCS</td>
-                </tr>
+                <?php
+                $no = 1;
+                $total_barang = 0;
+                $current_surat = '';
+                foreach ($data as $row):
+                    $total_barang += $row['jumlah_keluar'];
+                ?>
+                    <tr>
+                        <td class="text-center"><?= $no++ ?></td>
+                        <td><?= $row['kode_barang'] ?></td>
+                        <td><?= $row['nama_barang'] ?></td>
+                        <td class="text-center">
+                            <?= $row['jumlah_keluar'] ?> <?= strtoupper($row['nama_satuan'] ?: 'PCS') ?>
+                        </td>
+                        <td class="text-center"><?= date('d/m/Y', strtotime($row['tanggal_keluar'])) ?></td>
+                    </tr>
+                <?php endforeach; ?>
             </tbody>
         </table>
 
@@ -366,6 +259,10 @@
         <div class="card-footer">
             <div class="signature-box">
                 <div class="title">Diterima oleh,</div>
+                <div class="signature-line"></div>
+            </div>
+            <div class="signature-box">
+                <div class="title">Diserahkan oleh,</div>
                 <div class="signature-line"></div>
             </div>
             <div class="signature-box">

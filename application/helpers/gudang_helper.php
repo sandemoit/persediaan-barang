@@ -61,3 +61,20 @@ if (!function_exists('setting')) {
         return isset($managements[$column_name]) ? $managements[$column_name] : '';
     }
 }
+
+if (!function_exists('determinePackage')) {
+    function determinePackage($nama_barang)
+    {
+        // Logic bisnis untuk menentukan paket berdasarkan nama barang
+        // Contoh sederhana:
+        if (stripos($nama_barang, 'sd') !== false || stripos($nama_barang, 'primary') !== false) {
+            return 'PAKET PRIMARY (SD)';
+        } elseif (stripos($nama_barang, 'smp') !== false || stripos($nama_barang, 'junior') !== false) {
+            return 'PAKET JUNIOR (SMP)';
+        } elseif (stripos($nama_barang, 'sma') !== false || stripos($nama_barang, 'senior') !== false) {
+            return 'PAKET SENIOR (SMA)';
+        } else {
+            return 'PAKET UMUM';
+        }
+    }
+}

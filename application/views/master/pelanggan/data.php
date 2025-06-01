@@ -41,7 +41,7 @@
                                                 <tr>
                                                     <th>No</th>
                                                     <th>Nama</th>
-                                                    <th>Kode Toko</th>
+                                                    <th>Area</th>
                                                     <th>Alamat</th>
                                                     <th>Aksi</th>
                                                 </tr>

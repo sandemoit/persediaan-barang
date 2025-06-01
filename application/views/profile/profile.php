@@ -96,7 +96,7 @@
                                         <ul class="link-list-menu">
                                             <li><a class="active" href="javascript:;"><em class="icon ni ni-user-fill-c"></em><span>Informasi Pribadi</span></a></li>
                                             <!-- <li><a href="html/user-profile-notification.html"><em class="icon ni ni-bell-fill"></em><span>Notifications</span></a></li> -->
-                                            <li><a href="javascript:;"><em class="icon ni ni-activity-round-fill"></em><span>Account Activity</span></a></li>
+                                            <!-- <li><a href="javascript:;"><em class="icon ni ni-activity-round-fill"></em><span>Account Activity</span></a></li> -->
                                             <li><a href="<?= site_url('profile/changepassword') ?>"><em class="icon ni ni-lock-alt-fill"></em><span>Pengaturan keamanan</span></a></li>
                                         </ul>
                                     </div><!-- .card-inner -->
@@ -177,16 +177,21 @@
                 </ul><!-- .nav-tabs -->
                 <div class="tab-content">
                     <div class="tab-pane active" id="personal">
-                        <form action="<?= base_url('profile/image'); ?>" method="post" enctype="multipart/form-data">
+                        <form action="<?= base_url('profile/image'); ?>" method="post" enctype="multipart/form-data" id="imageForm">
                             <input type="hidden" name="id" value="<?= $user['id'] ?>">
                             <div class="col">
                                 <div class="form-group">
                                     <label class="form-label" for="image">Upload Foto</label>
                                     <div class="form-control-wrap">
                                         <div class="form-file">
-                                            <input type="file" class="form-file-input" id="image" name="image">
+                                            <input type="file" class="form-file-input" id="image" name="image" accept="image/jpeg,image/png" required>
                                             <label class="form-file-label" for="image">Choose foto</label>
                                             <p class="text-orange"><em>Maximal upload 2 MB & Format JPG, PNG.</em></p>
+                                            <div id="imagePreview" class="mt-2">
+                                                <?php if ($user['image'] != 'default.jpg'): ?>
+                                                    <img src="<?= base_url('assets/images/avatar/' . $user['image']) ?>" alt="Current Profile" style="max-height: 100px;">
+                                                <?php endif; ?>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -202,9 +207,41 @@
                                 </ul>
                             </div>
                         </form>
+
                     </div><!-- .tab-pane -->
                 </div><!-- .tab-content -->
             </div><!-- .modal-body -->
         </div><!-- .modal-content -->
     </div><!-- .modal-dialog -->
 </div><!-- .modal -->
+
+<script>
+    // Client-side image preview and validation
+    document.getElementById('image').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        const preview = document.getElementById('imagePreview');
+
+        if (!file) return;
+
+        // Check file type
+        if (!file.type.match('image/jpeg') && !file.type.match('image/png')) {
+            alert('Hanya file JPG/JPEG atau PNG yang diperbolehkan.');
+            e.target.value = '';
+            return;
+        }
+
+        // Check file size (2MB)
+        if (file.size > 2 * 1024 * 1024) {
+            alert('Ukuran file maksimal 2MB.');
+            e.target.value = '';
+            return;
+        }
+
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = '<img src="' + e.target.result + '" alt="Preview" style="max-height: 100px;">';
+        }
+        reader.readAsDataURL(file);
+    });
+</script>

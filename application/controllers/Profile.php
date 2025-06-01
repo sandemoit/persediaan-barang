@@ -38,33 +38,64 @@ class Profile extends CI_Controller
 
     public function image()
     {
+        // Check if user is logged in
+        if (!$this->session->userdata('email')) {
+            set_pesan('Anda harus login terlebih dahulu.', false);
+            redirect('login');
+        }
+
+        // Get user data
         $data['user'] = $this->db->get_where('user', ['email' => $this->session->userdata('email')])->row_array();
         $id_user = $this->input->post('id', true);
 
-        $config['upload_path'] = 'assets/images/avatar';
-        $config['allowed_types'] = 'jpg|png|jpeg';
-        $config['max_size'] = 2014;
-        $config['encrypt_name'] = TRUE;
-
-        $this->upload->initialize($config);
-
-        if ($this->upload->do_upload('image')) {
-            $old_image = $data['user']['image'];
-            if ($old_image != 'default.jpg') {
-                unlink(FCPATH . 'assets/images/avatar/' . $old_image);
-            }
-            $new_image = $this->upload->data('file_name');
-
-            $this->db->set('image', $new_image);
-            $this->db->where('id', $id_user);
-            $this->db->update('user');
-        } else {
-            set_pesan('Gagal mengupdate data user.', FALSE);
+        // Validate user ID
+        if (empty($id_user) || $id_user != $data['user']['id']) {
+            set_pesan('ID user tidak valid.', false);
             redirect('profile');
         }
 
-        set_pesan('Photo berhasil diupdate');
-        redirect('profile');
+        // Upload configuration
+        $config['upload_path'] = './assets/images/avatar/'; // Note the ./ at beginning
+        $config['allowed_types'] = 'jpg|jpeg|png';
+        $config['max_size'] = 2048; // 2MB in KB
+        $config['max_width'] = 2000;
+        $config['max_height'] = 2000;
+        $config['encrypt_name'] = true;
+        $config['remove_spaces'] = true;
+        $config['overwrite'] = false;
+
+        $this->upload->initialize($config);
+
+        if (!$this->upload->do_upload('image')) {
+            // Upload failed
+            $error = $this->upload->display_errors();
+            set_pesan('Gagal mengupload foto: ' . $error, false);
+            redirect('profile');
+        } else {
+            // Upload success
+            $upload_data = $this->upload->data();
+            $new_image = $upload_data['file_name'];
+
+            // Delete old image if it's not default
+            $old_image = $data['user']['image'];
+            if ($old_image != 'default.jpg' && file_exists(FCPATH . 'assets/images/avatar/' . $old_image)) {
+                unlink(FCPATH . 'assets/images/avatar/' . $old_image);
+            }
+
+            // Update database
+            $this->db->where('id', $id_user);
+            $update = $this->db->update('user', ['image' => $new_image]);
+
+            if ($update) {
+                set_pesan('Foto profil berhasil diupdate.');
+            } else {
+                // If DB update fails, delete the uploaded image
+                unlink($upload_data['full_path']);
+                set_pesan('Gagal mengupdate database.', false);
+            }
+
+            redirect('profile');
+        }
     }
 
     public function changepassword()

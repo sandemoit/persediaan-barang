@@ -97,7 +97,7 @@
                                                         <td><?= $bm['jumlah_masuk'] ?></td>
                                                         <td><?= $bm['nama_supplier'] ?></td>
                                                         <td><?= $bm['name'] ?></td>
-                                                        <td><?= number_format($bm['harga'], 0, ',', '.') ?></td>
+                                                        <td><?= number_format($bm['harga'] * $bm['jumlah_masuk'], 0, ',', '.') ?></td>
                                                         <td>
                                                             <div class="tb-odr-btns d-none d-md-inline">
                                                                 <a onclick="return confirm('Yakin ingin hapus?')" href="<?= base_url('masuk/delete/') . $bm['id_bmasuk'] ?>" class="btn btn-sm btn-danger"><em class="icon ni ni-trash"></em>Delete</a>
