@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tanda Terima</title>
+    <title><?= $title ?></title>
     <style>
         * {
             margin: 0;
@@ -81,7 +81,7 @@
             font-weight: bold;
         }
 
-        .nomor-MO {
+        .nomor-surat {
             margin: 15px 0;
             padding: 8px;
             border: 1px solid #000;
@@ -89,7 +89,7 @@
             text-align: center;
         }
 
-        .nomor-MO strong {
+        .nomor-surat strong {
             font-weight: bold;
             font-size: 12px;
         }
@@ -134,11 +134,12 @@
 
         td:last-child {
             text-align: center;
-            width: 60px;
+            width: 80px;
         }
 
-        .student-group {
+        .summary-row {
             background-color: #f8f8f8;
+            font-weight: bold;
         }
 
         .note {
@@ -173,25 +174,23 @@
             margin: 0 auto;
         }
 
+        .meta-info {
+            font-size: 10px;
+            color: #666;
+            text-align: right;
+            margin-top: 10px;
+        }
+
         /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .card-header {
-                flex-direction: column;
-                gap: 10px;
+        @media print {
+            body {
+                padding: 0;
+                background-color: white;
             }
 
-            .card-title {
-                flex: none;
-                width: 100%;
-            }
-
-            table {
-                font-size: 11px;
-            }
-
-            th,
-            td {
-                padding: 3px 2px;
+            .detail-content {
+                box-shadow: none;
+                border: 1px solid #000;
             }
         }
     </style>
@@ -201,24 +200,27 @@
     <div class="detail-content">
         <div class="card-header">
             <div class="company-info">
-                <h3>PT TUNAS TUJU ASA</h3>
-                Jl. KH. Mas Mansyur Kav. 35, Apt. Sudirman Park Lt. 1<br />
-                AB/01/06-07, Karet Tengsin, Tanah Abang, Jakarta Pusat
+                <h3><?php echo isset($setting['nama_perusahaan']) ? $setting['nama_perusahaan'] : 'NAMA PERUSAHAAN' ?></h3>
+                <?php echo isset($setting['alamat']) ? $setting['alamat'] : 'Alamat Perusahaan' ?><br />
+                <?php if (isset($setting['telepon']) && !empty($setting['telepon'])): ?>
+                    Telp: <?php echo $setting['telepon'] ?><br />
+                <?php endif ?>
             </div>
             <div class="card-title">
                 <h2>TANDA TERIMA</h2>
-                <div class="doc-number">No. TT/2505/003</div>
+                <div class="doc-number"><?= $no_surat ?></div>
             </div>
             <div class="recipient-info">
                 <strong>Tanggal:</strong> <?= $generated_date ?><br />
-                <strong>Kepada:</strong> KD3 - PT. Tunas Cahaya Kirana<br />
-                <strong>Alamat:</strong> Jl. Siliwangi, KP. Rawa Panjang No. 110A<br />
-                RT 002 RW 004, Sepanjang Jaya, Rawalumbu, Bekasi - Jawa Barat
+                <strong>Kepada:</strong> <?= $nama_pelanggan ?><br />
+                <?php if (!empty($alamat_pelanggan)): ?>
+                    <strong>Alamat:</strong> <?= $alamat_pelanggan ?>
+                <?php endif ?>
             </div>
         </div>
 
-        <div class="nomor-MO">
-            <strong>Nomor MO: 001-006/IV/2024</strong>
+        <div class="nomor-surat">
+            <strong>Nomor Surat: <?= $no_surat ?></strong>
         </div>
 
         <table>
@@ -235,7 +237,6 @@
                 <?php
                 $no = 1;
                 $total_barang = 0;
-                $current_surat = '';
                 foreach ($data as $row):
                     $total_barang += $row['jumlah_keluar'];
                 ?>
@@ -244,16 +245,27 @@
                         <td><?= $row['kode_barang'] ?></td>
                         <td><?= $row['nama_barang'] ?></td>
                         <td class="text-center">
-                            <?= $row['jumlah_keluar'] ?> <?= strtoupper($row['nama_satuan'] ?: 'PCS') ?>
+                            <?= number_format($row['jumlah_keluar'], 0, ',', '.') ?>
+                            <?= strtoupper($row['nama_satuan'] ?: 'PCS') ?>
                         </td>
                         <td class="text-center"><?= date('d/m/Y', strtotime($row['tanggal_keluar'])) ?></td>
                     </tr>
                 <?php endforeach; ?>
+
+                <!-- Summary row -->
+                <tr class="summary-row">
+                    <td colspan="3" class="text-center"><strong>TOTAL</strong></td>
+                    <td class="text-center"><strong><?= number_format($total_barang, 0, ',', '.') ?> Items</strong></td>
+                    <td class="text-center">-</td>
+                </tr>
             </tbody>
         </table>
 
         <div class="note">
-            Pastikan Barang yang diterima sudah sesuai. Batas Waktu Koreksi s.d Tanggal: ________
+            <strong>Catatan:</strong><br>
+            • Pastikan barang yang diterima sudah sesuai dengan daftar di atas<br>
+            • Batas waktu koreksi s.d tanggal: <?= date('d/m/Y', strtotime('+7 days')) ?><br>
+            • Hubungi kami jika ada ketidaksesuaian
         </div>
 
         <div class="card-footer">
@@ -273,6 +285,10 @@
                 <div class="title">Disetujui oleh,</div>
                 <div class="signature-line"></div>
             </div>
+        </div>
+
+        <div class="meta-info">
+            Dicetak pada: <?= $generated_date ?> | Total Item: <?= isset($total_items) ? $total_items : count($data) ?>
         </div>
     </div>
 </body>

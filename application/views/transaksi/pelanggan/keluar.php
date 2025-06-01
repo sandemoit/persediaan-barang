@@ -144,20 +144,18 @@
 
 <!-- Modal Unduh Surat -->
 <div class="modal fade" tabindex="-1" id="unduh-surat">
-    <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <a href="#" class="close" data-bs-dismiss="modal" aria-label="Close">
-                <em class="icon ni ni-cross"></em>
-            </a>
             <div class="modal-header">
                 <h5 class="modal-title">Unduh Surat Keluar</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
                     <div class="row">
-                        <div class="col-6">
+                        <div class="col-12">
                             <div class="form-control-wrap">
-                                <label class="form-label" for="no_surat_select">No Surat</label>
+                                <label class="form-label" for="no_surat_select">No Surat <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <select name="no_surat" id="no_surat_select" class="form-select">
                                         <option selected disabled value="">Pilih No Surat</option>
@@ -166,31 +164,17 @@
                                         <?php endforeach ?>
                                     </select>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="col-3">
-                            <div class="form-control-wrap">
-                                <label class="form-label" for="tanggal_awal">Tanggal Awal</label>
-                                <div class="input-group">
-                                    <input type="date" class="form-control" id="tanggal_awal" name="tanggal_awal">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-3">
-                            <div class="form-control-wrap">
-                                <label class="form-label" for="tanggal_akhir">Tanggal Akhir</label>
-                                <div class="input-group">
-                                    <input type="date" class="form-control" id="tanggal_akhir" name="tanggal_akhir">
-                                </div>
+                                <div class="form-text text-muted">Pilih nomor surat yang ingin diunduh</div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Info text -->
                     <div class="alert alert-info mt-3">
-                        <strong>Cara Penggunaan:</strong><br>
-                        • <strong>Berdasarkan No Surat + Tanggal Hari Ini:</strong> Pilih No Surat saja (tanggal akan otomatis hari ini)<br>
-                        • <strong>Berdasarkan No Surat + Rentang Tanggal:</strong> Pilih No Surat dan isi kedua tanggal<br>
+                        <strong>Informasi:</strong><br>
+                        • Pilih nomor surat untuk mengunduh semua data terkait nomor surat tersebut<br>
+                        • File akan diunduh dalam format PDF<br>
+                        • File akan otomatis terhapus setelah diunduh
                     </div>
                 </div>
 
@@ -206,14 +190,11 @@
                 <div id="alertContainer" class="mt-3"></div>
             </div>
             <div class="modal-footer bg-light">
-                <ul class="align-center flex-wrap flex-sm-nowrap gx-4 gy-2">
-                    <li>
-                        <button class="btn btn-primary" id="downloadBtn" disabled>Unduh</button>
-                    </li>
-                    <li>
-                        <a href="#" class="link" data-bs-dismiss="modal">Cancel</a>
-                    </li>
-                </ul>
+                <button class="btn btn-primary" id="downloadBtn" disabled>
+                    <span class="spinner-border spinner-border-sm me-2" role="status" style="display: none;"></span>
+                    Unduh PDF
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
             </div>
         </div>
     </div>
@@ -509,150 +490,118 @@
     });
 </script>
 
+<!-- js unduh surat -->
 <script>
     $(document).ready(function() {
         // Initialize Select2
-        $('.js-select2').select2();
+        $('#no_surat_select').select2({
+            placeholder: "Pilih No Surat",
+            allowClear: true,
+            dropdownParent: $('#unduh-surat')
+        });
 
-        var n = 1;
-        var ls = [];
+        // Enable/disable download button based on selection
+        $('#no_surat_select').on('change', function() {
+            const downloadBtn = $('#downloadBtn');
+            if ($(this).val()) {
+                downloadBtn.prop('disabled', false);
+            } else {
+                downloadBtn.prop('disabled', true);
+            }
+        });
 
-        $('#addtoList').click(function() {
-            var plg = $("#pelanggan_id").val();
-            var brg = $("#barang_id").val();
-            var sel = $("#barang_id option:selected").text(); // Alternatif cara mendapatkan text
-            var jum = parseInt($("#jumlah_keluar").val());
-            var iduser = $("#id_user").val();
-            var tgl = $("#tanggal_keluar").val();
-            var nosurat = $('#no_surat_keluar').val();
+        // Handle download button click
+        $('#downloadBtn').on('click', function() {
+            const no_surat = $('#no_surat_select').val();
 
-            // Debugging - cek nilai yang didapat
-            // console.log(nosurat);
-
-            // Validasi input
-            if (!plg) {
-                alert('Isikan Pelanggan dengan benar.');
-                return false;
+            if (!no_surat) {
+                showAlert('error', 'Silakan pilih nomor surat terlebih dahulu!');
+                return;
             }
 
-            if (!brg) {
-                alert('Isikan Barang dengan benar.');
-                return false;
-            }
+            // Show progress
+            showProgress(true);
 
-            if (!jum || jum <= 0) {
-                alert('Isikan Jumlah dengan benar.');
-                return false;
-            }
+            // AJAX request to download
+            $.ajax({
+                url: <?= base_url('keluar/unduhSurat') ?>, // Adjust URL as needed
+                type: 'POST',
+                data: {
+                    no_surat: no_surat
+                },
+                dataType: 'json',
+                success: function(response) {
+                    showProgress(false);
 
-            var ch = ls.includes(brg);
+                    if (response.success) {
+                        showAlert('success', response.message);
 
-            $.post(baseurl + 'pelanggan/getstok/' + brg, function(res, status) {
-                var stok = parseInt(res) || 0;
+                        // Create download link and trigger click
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = response.download_url;
+                        downloadLink.download = response.filename;
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        document.body.removeChild(downloadLink);
 
-                if (ch) {
-                    // Item sudah ada, update jumlah
-                    var currentJum = parseInt($('#jls-' + brg).val()) || 0;
-                    var newJum = currentJum + jum;
+                        // Close modal after short delay
+                        setTimeout(function() {
+                            $('#unduh-surat').modal('hide');
+                        }, 2000);
 
-                    if (newJum > stok) {
-                        alert('Maaf sisa stok tidak cukup : ' + stok);
-                        return false;
                     } else {
-                        $('#jls-' + brg).val(newJum);
-                        $('#jtextls-' + brg).text(newJum);
+                        showAlert('error', response.message || 'Terjadi kesalahan saat mengunduh file');
                     }
-                } else {
-                    // Item baru
-                    if (jum > stok) {
-                        alert('Maaf sisa stok tidak cukup : ' + stok);
-                        return false;
-                    } else {
-                        ls.push(brg);
-
-                        var nr = `<tr id="trlist-${brg}">
-                        <td>
-                            <input type="hidden" name="tanggal_keluar[${n}]" id="tls-${n}" value="${tgl}">
-                            <input type="hidden" name="id_user[${n}]" id="ils-${n}" value="${iduser}">
-                            <input type="hidden" name="no_surat[${n}]" id="nls-${n}" value="${nosurat}">
-                            <input type="hidden" name="pelanggan_id[${n}]" id="pls-${n}" value="${plg}">
-                            <input type="hidden" name="barang_id[${n}]" id="bls-${n}" value="${brg}">
-                            <input type="hidden" name="jumlah_keluar[${n}]" id="jls-${brg}" value="${jum}">
-                            ${sel}
-                        </td>
-                        <td><span id="jtextls-${brg}">${jum}</span></td>
-                        <td align="center">
-                            <button type="button" onclick="removeList('${brg}')" class="btn btn-sm btn-danger">
-                                <em class="icon ni ni-trash-alt"></em>
-                            </button>
-                        </td>
-                    </tr>`;
-
-                        $('#list').append(nr);
-                        n++;
-                    }
+                },
+                error: function(xhr, status, error) {
+                    showProgress(false);
+                    console.error('AJAX Error:', error);
+                    showAlert('error', 'Terjadi kesalahan koneksi. Silakan coba lagi.');
                 }
-
-                // Clear form inputs
-                $('#jumlah_keluar').val('');
-                $('#barang_id').val('').trigger('change');
-
-            }).fail(function() {
-                alert('Error getting stock data');
             });
         });
 
-        function removeList(brg) {
-            var brg = brg.toString();
-            var posDel = $.inArray(brg, ls);
+        // Reset modal when closed
+        $('#unduh-surat').on('hidden.bs.modal', function() {
+            $('#no_surat_select').val(null).trigger('change');
+            $('#alertContainer').empty();
+            showProgress(false);
+        });
 
-            if (posDel > -1) {
-                ls.splice(posDel, 1);
+        function showProgress(show) {
+            const progressDiv = $('#downloadProgress');
+            const downloadBtn = $('#downloadBtn');
+            const spinner = downloadBtn.find('.spinner-border');
+
+            if (show) {
+                progressDiv.show();
+                downloadBtn.prop('disabled', true);
+                spinner.show();
+            } else {
+                progressDiv.hide();
+                downloadBtn.prop('disabled', !$('#no_surat_select').val());
+                spinner.hide();
             }
-
-            $(`#trlist-${brg}`).remove();
         }
 
-        // Make removeList globally accessible
-        window.removeList = removeList;
+        function showAlert(type, message) {
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+            const iconClass = type === 'success' ? 'check-circle' : 'exclamation-triangle';
 
-        // Event handler untuk select barang - update stok display
-        $('#barang_id').on('change', function() {
-            var selectedOption = $(this).find('option:selected');
-            var stok = selectedOption.data('stok') || 0;
+            const alert = `
+                    <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                        <strong>${type === 'success' ? 'Berhasil!' : 'Error!'}</strong> ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                `;
 
-            $('#stok').val(stok);
+            $('#alertContainer').html(alert);
 
-            // Hitung sisa stok berdasarkan jumlah keluar
-            updateSisaStok();
-
-            // Show/hide warning
-            if (stok <= 5 && stok > 0) {
-                $('#stokWarning').show();
-            } else {
-                $('#stokWarning').hide();
-            }
-        });
-
-        // Event handler untuk jumlah keluar
-        $('#jumlah_keluar').on('input', function() {
-            updateSisaStok();
-        });
-
-        function updateSisaStok() {
-            var stok = parseInt($('#stok').val()) || 0;
-            var jumlahKeluar = parseInt($('#jumlah_keluar').val()) || 0;
-            var sisaStok = stok - jumlahKeluar;
-
-            $('#total_stok').val(sisaStok);
-
-            // Validasi real-time
-            if (sisaStok < 0) {
-                $('#total_stok').addClass('is-invalid');
-                $('#jumlah_keluar').addClass('is-invalid');
-            } else {
-                $('#total_stok').removeClass('is-invalid');
-                $('#jumlah_keluar').removeClass('is-invalid');
+            // Auto hide success alerts
+            if (type === 'success') {
+                setTimeout(function() {
+                    $('#alertContainer .alert').alert('close');
+                }, 5000);
             }
         }
     });

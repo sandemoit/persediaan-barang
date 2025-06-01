@@ -94,47 +94,26 @@ class Keluar extends CI_Controller
         $this->load->view('template/footer');
     }
 
+    /**
+     * Controller method untuk unduh surat - hanya berdasarkan nomor surat
+     */
     public function unduhSurat()
     {
         // Set response headers
         header('Content-Type: application/json');
 
         try {
-            // Log untuk debugging
-            log_message('debug', 'unduhSurat function called');
-
-            $berdasarkan = $this->input->post('berdasarkan');
             $no_surat = $this->input->post('no_surat');
-            $tanggal_awal = $this->input->post('tanggal_awal');
-            $tanggal_akhir = $this->input->post('tanggal_akhir');
 
-            // Log input data
-            log_message('debug', 'Input data: ' . json_encode([
-                'berdasarkan' => $berdasarkan,
-                'no_surat' => $no_surat,
-                'tanggal_awal' => $tanggal_awal,
-                'tanggal_akhir' => $tanggal_akhir
-            ]));
-
-            // Validasi dasar
-            if (empty($no_surat) && (empty($tanggal_awal) || empty($tanggal_akhir))) {
-                throw new Exception('Pilih nomor surat atau isi rentang tanggal untuk mengunduh');
+            // Validasi input
+            if (empty($no_surat)) {
+                throw new Exception('Nomor surat harus dipilih untuk mengunduh');
             }
 
-            // Validasi tanggal jika keduanya diisi
-            if (!empty($tanggal_awal) && !empty($tanggal_akhir)) {
-                if (strtotime($tanggal_awal) > strtotime($tanggal_akhir)) {
-                    throw new Exception('Tanggal awal tidak boleh lebih besar dari tanggal akhir');
-                }
-            }
+            // Proses unduh berdasarkan nomor surat
+            $result = $this->downloadSuratByNumber($no_surat);
 
-            // Proses unduh berdasarkan parameter yang ada
-            $result = $this->downloadSurat($no_surat, $tanggal_awal, $tanggal_akhir, $berdasarkan);
-
-            // Log hasil
-            log_message('debug', 'Download result: ' . json_encode($result));
-
-            // Return JSON response langsung
+            // Return JSON response
             echo json_encode($result);
             return;
         } catch (Exception $e) {
@@ -143,81 +122,52 @@ class Keluar extends CI_Controller
                 'message' => $e->getMessage()
             ];
 
-            // Log error
-            log_message('error', 'unduhSurat error: ' . $e->getMessage());
-
             echo json_encode($error_response);
             return;
         }
     }
 
-    private function downloadSurat($no_surat = null, $tanggal_awal = null, $tanggal_akhir = null, $berdasarkan = null)
+    /**
+     * Method untuk download surat berdasarkan nomor surat saja
+     */
+    private function downloadSuratByNumber($no_surat)
     {
         try {
-            log_message('debug', 'downloadSurat called with params: ' . json_encode([
-                'no_surat' => $no_surat,
-                'tanggal_awal' => $tanggal_awal,
-                'tanggal_akhir' => $tanggal_akhir,
-                'berdasarkan' => $berdasarkan
-            ]));
-
-            // Tentukan jenis pencarian dan ambil data
-            if (!empty($no_surat)) {
-                if ($berdasarkan === 'surat_jalan_hari_ini') {
-                    // No surat dengan tanggal hari ini
-                    log_message('debug', 'Using surat_jalan_hari_ini method');
-                    $data = $this->getDataBySuratJalanAndDate($no_surat, $tanggal_awal, $tanggal_akhir);
-                    $filename = 'surat-keluar-' . str_replace('/', '-', $no_surat) . '-' . date('Y-m-d') . '.pdf';
-                    $title = 'Surat Keluar - ' . $no_surat . ' (' . date('d/m/Y') . ')';
-                } else {
-                    // No surat dengan rentang tanggal
-                    log_message('debug', 'Using surat_jalan_rentang method');
-                    $data = $this->getDataBySuratJalanAndDate($no_surat, $tanggal_awal, $tanggal_akhir);
-                    $filename = 'surat-keluar-' . str_replace('/', '-', $no_surat) . '-' . $tanggal_awal . '-to-' . $tanggal_akhir . '.pdf';
-                    $title = 'Surat Keluar - ' . $no_surat . ' (' . date('d/m/Y', strtotime($tanggal_awal)) . ' - ' . date('d/m/Y', strtotime($tanggal_akhir)) . ')';
-                }
-            } else {
-                // Hanya berdasarkan rentang tanggal
-                log_message('debug', 'Using rentang_tanggal method');
-                $data = $this->getDataByRentangTanggal($tanggal_awal, $tanggal_akhir);
-                $filename = 'surat-keluar-' . $tanggal_awal . '-to-' . $tanggal_akhir . '.pdf';
-                $title = 'Surat Keluar ' . date('d/m/Y', strtotime($tanggal_awal)) . ' - ' . date('d/m/Y', strtotime($tanggal_akhir));
-            }
-
-            log_message('debug', 'Data count: ' . count($data));
+            // Ambil data berdasarkan nomor surat
+            $data = $this->getDataByNoSurat($no_surat);
 
             if (empty($data)) {
-                throw new Exception('Data tidak ditemukan untuk kriteria yang dipilih');
+                throw new Exception('Data tidak ditemukan untuk nomor surat: ' . $no_surat);
             }
 
+            // Generate filename dan title
+            $filename = 'surat-keluar-' . str_replace('/', '-', $no_surat) . '-' . date('Y-m-d-H-i-s') . '.pdf';
+            $title = 'Surat Keluar - ' . $no_surat;
+
             // Generate PDF
-            $file_info = $this->generatePDFFile($data, $filename, $title, $no_surat, $tanggal_awal, $tanggal_akhir);
+            $file_info = $this->generatePDFFile($data, $filename, $title, $no_surat);
 
             $result = [
                 'success' => true,
                 'message' => 'File PDF berhasil dibuat dan siap diunduh',
                 'download_url' => base_url('keluar/downloadFile/' . urlencode($filename)),
                 'filename' => $filename,
-                'file_size' => $this->formatBytes(filesize($file_info['path']))
+                'file_size' => $this->formatBytes(filesize($file_info['path'])),
+                'total_items' => count($data)
             ];
 
-            log_message('debug', 'Success result: ' . json_encode($result));
             return $result;
         } catch (Exception $e) {
-            log_message('error', 'downloadSurat error: ' . $e->getMessage());
             throw new Exception($e->getMessage());
         }
     }
 
-    private function getDataBySuratJalanAndDate($no_surat, $tanggal_awal, $tanggal_akhir)
+    /**
+     * Method untuk mengambil data berdasarkan nomor surat saja
+     */
+    private function getDataByNoSurat($no_surat)
     {
-        log_message('debug', 'getDataBySuratJalanAndDate called: ' . json_encode([
-            'no_surat' => $no_surat,
-            'tanggal_awal' => $tanggal_awal,
-            'tanggal_akhir' => $tanggal_akhir
-        ]));
-
-        // Query untuk mendapatkan data berdasarkan nomor surat dan rentang tanggal
+        // Query untuk mendapatkan semua data berdasarkan nomor surat
         $this->db->select('
         bk.id_bkeluar,
         bk.no_surat,
@@ -235,77 +185,33 @@ class Keluar extends CI_Controller
         $this->db->join('pelanggan p', 'bk.pelanggan_id = p.id_pelanggan', 'left');
         $this->db->join('satuan s', 'b.id_satuan = s.id', 'left');
         $this->db->where('bk.no_surat', $no_surat);
-        $this->db->where('bk.tanggal_keluar >=', $tanggal_awal);
-        $this->db->where('bk.tanggal_keluar <=', $tanggal_akhir);
         $this->db->order_by('bk.tanggal_keluar', 'ASC');
         $this->db->order_by('bk.id_bkeluar', 'ASC');
 
         $query = $this->db->get();
         $result = $query->result_array();
 
-        // Log query untuk debugging
-        log_message('debug', 'SQL Query: ' . $this->db->last_query());
-        log_message('debug', 'Query result count: ' . count($result));
-
         return $result;
     }
 
-    private function getDataByRentangTanggal($tanggal_awal, $tanggal_akhir)
+    /**
+     * Method untuk generate PDF file (updated)
+     */
+    private function generatePDFFile($data, $filename, $title, $no_surat = null)
     {
-        log_message('debug', 'getDataByRentangTanggal called: ' . json_encode([
-            'tanggal_awal' => $tanggal_awal,
-            'tanggal_akhir' => $tanggal_akhir
-        ]));
+        // Ambil setting perusahaan
+        $setting = $this->Other_model->getSetting();
 
-        // Query untuk mendapatkan data berdasarkan rentang tanggal saja
-        $this->db->select('
-        bk.id_bkeluar,
-        bk.no_surat,
-        bk.jumlah_keluar,
-        bk.tanggal_keluar,
-        b.kode_barang,
-        b.nama_barang,
-        p.nama as nama_pelanggan,
-        p.kode_toko,
-        p.alamat,
-        s.nama_satuan
-    ');
-        $this->db->from('barang_keluar bk');
-        $this->db->join('barang b', 'bk.barang_id = b.kode_barang', 'left');
-        $this->db->join('pelanggan p', 'bk.pelanggan_id = p.id_pelanggan', 'left');
-        $this->db->join('satuan s', 'b.id_satuan = s.id', 'left');
-        $this->db->where('bk.tanggal_keluar >=', $tanggal_awal);
-        $this->db->where('bk.tanggal_keluar <=', $tanggal_akhir);
-        $this->db->order_by('bk.tanggal_keluar', 'DESC');
-        $this->db->order_by('bk.no_surat', 'ASC');
-
-        $query = $this->db->get();
-        $result = $query->result_array();
-
-        // Log query untuk debugging
-        log_message('debug', 'SQL Query: ' . $this->db->last_query());
-        log_message('debug', 'Query result count: ' . count($result));
-
-        return $result;
-    }
-
-    private function formatBytes($size, $precision = 2)
-    {
-        $base = log($size, 1024);
-        $suffixes = array('B', 'KB', 'MB', 'GB', 'TB');
-        return round(pow(1024, $base - floor($base)), $precision) . ' ' . $suffixes[floor($base)];
-    }
-
-    private function generatePDFFile($data, $filename, $title, $no_surat = null, $tanggal_awal = null, $tanggal_akhir = null)
-    {
         // Siapkan data untuk view
         $pdf_data = [
             'title' => $title,
             'data' => $data,
             'no_surat' => $no_surat,
-            'tanggal_awal' => $tanggal_awal,
-            'tanggal_akhir' => $tanggal_akhir,
-            'generated_date' => date('d/m/Y H:i:s')
+            'setting' => $setting,
+            'nama_pelanggan' => $data[0]['nama_pelanggan'] ?? '',
+            'alamat_pelanggan' => $data[0]['alamat'] ?? '',
+            'generated_date' => date('d/m/Y H:i:s'),
+            'total_items' => count($data)
         ];
 
         // Load view dan convert ke string
@@ -315,6 +221,7 @@ class Keluar extends CI_Controller
         $options = new Options();
         $options->set('isRemoteEnabled', true);
         $options->set('isHtml5ParserEnabled', true);
+        $options->set('defaultFont', 'Arial');
 
         // Inisialisasi DomPDF
         $dompdf = new Dompdf($options);
@@ -338,6 +245,9 @@ class Keluar extends CI_Controller
         ];
     }
 
+    /**
+     * Method untuk download file (tetap sama)
+     */
     public function downloadFile($filename = '')
     {
         $filename = urldecode($filename);
@@ -375,7 +285,21 @@ class Keluar extends CI_Controller
         }
     }
 
-    // Method untuk membersihkan file lama (jalankan via cron job atau manual)
+    /**
+     * Method untuk format ukuran file
+     */
+    private function formatBytes($size, $precision = 2)
+    {
+        if ($size <= 0) return '0 B';
+
+        $base = log($size, 1024);
+        $suffixes = array('B', 'KB', 'MB', 'GB', 'TB');
+        return round(pow(1024, $base - floor($base)), $precision) . ' ' . $suffixes[floor($base)];
+    }
+
+    /**
+     * Method untuk cleanup file lama (opsional)
+     */
     public function cleanupOldFiles()
     {
         $upload_path = FCPATH . 'downloads/';
@@ -387,8 +311,8 @@ class Keluar extends CI_Controller
 
             foreach ($files as $file) {
                 if (is_file($file)) {
-                    // Hapus file yang lebih dari 2 jam
-                    if ($now - filemtime($file) >= 7200) {
+                    // Hapus file yang lebih dari 1 jam
+                    if ($now - filemtime($file) >= 3600) {
                         if (unlink($file)) {
                             $cleaned++;
                         }
