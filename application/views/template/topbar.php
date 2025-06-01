@@ -8,7 +8,7 @@
                     <a href="#" class="nk-nav-toggle nk-quick-nav-icon" data-target="sidebarMenu"><em class="icon ni ni-menu"></em></a>
                 </div>
                 <div class="nk-header-brand d-xl-none">
-                    <a href="html/index.html" class="logo-link">
+                    <a href="/" class="logo-link">
                         <img class="logo-light logo-img" src="<?= base_url('assets/images/') . setting('image') ?>" srcset="<?= base_url('assets/images/') . setting('image') ?>" alt="logo">
                     </a>
                 </div>
