@@ -203,11 +203,11 @@
 </div>
 
 <!-- Modal Content Code -->
-<form role="form" id="myform" method="post" action="<?= site_url('pelanggan/trx') ?>">
-    <?php if (isset($user)) : ?>
-        <input type="hidden" id="id_user" value="<?= $user['id']; ?>">
-    <?php endif ?>
-    <div class="modal fade" tabindex="-1" id="add">
+<div class="modal fade" tabindex="-1" id="add">
+    <form role="form" id="myform" method="post" action="<?= site_url('pelanggan/trx') ?>">
+        <?php if (isset($user)) : ?>
+            <input type="hidden" id="id_user" value="<?= $user['id']; ?>">
+        <?php endif ?>
         <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <a href="#" class="close" data-bs-dismiss="modal" aria-label="Close">
@@ -223,7 +223,7 @@
                         <div class="col-lg-6 col-md-12 col-sm-12">
                             <div class="form-group">
                                 <label class="form-label" for="room-no-add">Pelanggan</label>
-                                <select name="pelanggan_id" id="pelanggan_id" data-search="on" class="js-select2">
+                                <select name="pelanggan_id" id="pelanggan_id" class="select2-pelanggan form-select">
                                     <option selected disabled>Pilih Pelanggan</option>
                                     <?php foreach ($pelanggan as $value) : ?>
                                         <option value="<?= $value['id_pelanggan']; ?>"><?= $value['nama']; ?></option>
@@ -236,7 +236,7 @@
                             </div>
                             <div class="form-group">
                                 <label class="form-label" for="room-no-add">Barang</label>
-                                <select name="barang_id" id="barang_id" data-search="on" class="js-select2">
+                                <select name="barang_id" id="barang_id" class="select2-barang form-select">
                                     <option selected disabled>Pilih Barang</option>
                                     <?php foreach ($barang as $b) : ?>
                                         <option data-stok="<?= $b['stok']; ?>" value="<?= $b['kode_barang']; ?>"><?= $b['kode_barang'] . ' | ' . $b['nama_barang']; ?></option>
@@ -312,185 +312,8 @@
                 </div>
             </div>
         </div>
-    </div>
-</form>
-
-<!-- js unduh surat -->
-<script>
-    $(document).ready(function() {
-        // Elements
-        const $noSuratSelect = $('#no_surat_select');
-        const $tanggalAwal = $('#tanggal_awal');
-        const $tanggalAkhir = $('#tanggal_akhir');
-        const $downloadBtn = $('#downloadBtn');
-        const $downloadProgress = $('#downloadProgress');
-        const $alertContainer = $('#alertContainer');
-
-        // Set default dates to today
-        const today = new Date().toISOString().split('T')[0];
-
-        // Reset form when modal opens
-        $('#unduh-surat').on('show.bs.modal', function() {
-            resetForm();
-        });
-
-        // Handle input changes for validation
-        $noSuratSelect.on('change', checkFormValidation);
-        $tanggalAwal.on('change', checkFormValidation);
-        $tanggalAkhir.on('change', checkFormValidation);
-
-        // Handle download button click
-        $downloadBtn.on('click', function() {
-            const noSurat = $noSuratSelect.val();
-            const tanggalAwal = $tanggalAwal.val();
-            const tanggalAkhir = $tanggalAkhir.val();
-
-            // Validate inputs
-            if (!noSurat && (!tanggalAwal || !tanggalAkhir)) {
-                showAlert('Pilih No Surat atau isi rentang tanggal untuk mengunduh.', 'warning');
-                return;
-            }
-
-            // Validate date range if both dates are filled
-            if (tanggalAwal && tanggalAkhir && new Date(tanggalAwal) > new Date(tanggalAkhir)) {
-                showAlert('Tanggal awal tidak boleh lebih besar dari tanggal akhir.', 'warning');
-                return;
-            }
-
-            // Prepare request data
-            let requestData = {};
-
-            if (noSurat) {
-                requestData.no_surat = noSurat;
-
-                // If no dates provided, use today's date
-                if (!tanggalAwal || !tanggalAkhir) {
-                    requestData.tanggal_awal = today;
-                    requestData.tanggal_akhir = today;
-                    requestData.berdasarkan = 'surat_jalan_hari_ini';
-                } else {
-                    requestData.tanggal_awal = tanggalAwal;
-                    requestData.tanggal_akhir = tanggalAkhir;
-                    requestData.berdasarkan = 'surat_jalan_rentang';
-                }
-            } else {
-                // Only date range
-                requestData.tanggal_awal = tanggalAwal;
-                requestData.tanggal_akhir = tanggalAkhir;
-                requestData.berdasarkan = 'rentang_tanggal';
-            }
-
-            startDownload(requestData);
-        });
-
-        function checkFormValidation() {
-            const noSurat = $noSuratSelect.val();
-            const tanggalAwal = $tanggalAwal.val();
-            const tanggalAkhir = $tanggalAkhir.val();
-
-            // Enable button if:
-            // 1. No Surat is selected (dates are optional)
-            // 2. OR both dates are filled (No Surat is optional)
-            const isValid = noSurat || (tanggalAwal && tanggalAkhir);
-
-            $downloadBtn.prop('disabled', !isValid);
-            clearAlerts();
-        }
-
-        function resetForm() {
-            $noSuratSelect.val('');
-            $tanggalAwal.val(today);
-            $tanggalAkhir.val(today);
-            $downloadBtn.prop('disabled', true);
-            clearAlerts();
-        }
-
-        function startDownload(data) {
-            $downloadBtn.prop('disabled', true);
-            $downloadProgress.show();
-            clearAlerts();
-
-            $.ajax({
-                url: '<?= base_url('keluar/unduhSurat') ?>',
-                type: 'POST',
-                data: data,
-                dataType: 'json',
-                timeout: 30000, // 30 seconds timeout
-                success: function(response) {
-                    $downloadProgress.hide();
-
-                    if (response && response.success) {
-                        if (response.download_url) {
-                            // Create temporary link to download file
-                            const link = document.createElement('a');
-                            link.href = response.download_url;
-                            link.download = response.filename || 'surat-keluar.pdf';
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                        }
-
-                        showAlert(response.message + (response.file_size ? ' (Ukuran: ' + response.file_size + ')' : ''), 'success');
-                        resetFormAfterDownload();
-                    } else {
-                        showAlert(response.message || 'Terjadi kesalahan saat mengunduh file.', 'danger');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('AJAX Error Details:', {
-                        status: status,
-                        error: error,
-                        responseText: xhr.responseText,
-                        statusCode: xhr.status
-                    });
-
-                    $downloadProgress.hide();
-
-                    let errorMessage = 'Terjadi kesalahan pada server.';
-
-                    if (xhr.responseText) {
-                        try {
-                            const errorResponse = JSON.parse(xhr.responseText);
-                            if (errorResponse.message) {
-                                errorMessage = errorResponse.message;
-                            }
-                        } catch (e) {
-                            console.error('Failed to parse error response:', e);
-                            errorMessage += ' Detail: ' + xhr.responseText.substring(0, 100);
-                        }
-                    }
-
-                    showAlert(errorMessage, 'danger');
-                },
-                complete: function() {
-                    checkFormValidation();
-                }
-            });
-        }
-
-        function resetFormAfterDownload() {
-            $noSuratSelect.val('');
-            // Keep today's date as default
-            $tanggalAwal.val(today);
-            $tanggalAkhir.val(today);
-            checkFormValidation();
-        }
-
-        function showAlert(message, type) {
-            const alertHtml = `
-                <div class="alert alert-${type} alert-dismissible">
-                    ${message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            `;
-            $alertContainer.html(alertHtml);
-        }
-
-        function clearAlerts() {
-            $alertContainer.empty();
-        }
-    });
-</script>
+    </form>
+</div>
 
 <!-- js unduh surat -->
 <script>
@@ -512,6 +335,19 @@
             }
         });
 
+        function resetForm() {
+            $('#no_surat_select').val('').trigger('change');
+            $('#alertContainer').empty();
+            showProgress(false);
+        }
+
+        function clearForm() {
+            $('#no_surat_select').val('').trigger('change');
+            $('#alertContainer').empty();
+            showProgress(false);
+            $('#downloadBtn').prop('disabled', true);
+        }
+
         // Handle download button click
         $('#downloadBtn').on('click', function() {
             const no_surat = $('#no_surat_select').val();
@@ -526,7 +362,7 @@
 
             // AJAX request to download
             $.ajax({
-                url: <?= base_url('keluar/unduhSurat') ?>, // Adjust URL as needed
+                url: baseUrl + 'keluar/unduhSurat', // Adjust URL as needed
                 type: 'POST',
                 data: {
                     no_surat: no_surat
@@ -545,12 +381,6 @@
                         document.body.appendChild(downloadLink);
                         downloadLink.click();
                         document.body.removeChild(downloadLink);
-
-                        // Close modal after short delay
-                        setTimeout(function() {
-                            $('#unduh-surat').modal('hide');
-                        }, 2000);
-
                     } else {
                         showAlert('error', response.message || 'Terjadi kesalahan saat mengunduh file');
                     }
@@ -565,9 +395,7 @@
 
         // Reset modal when closed
         $('#unduh-surat').on('hidden.bs.modal', function() {
-            $('#no_surat_select').val(null).trigger('change');
-            $('#alertContainer').empty();
-            showProgress(false);
+            clearForm();
         });
 
         function showProgress(show) {
@@ -591,7 +419,7 @@
             const iconClass = type === 'success' ? 'check-circle' : 'exclamation-triangle';
 
             const alert = `
-                    <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+                    <div class="alert ${alertClass} alert-dismissible fade show">
                         <strong>${type === 'success' ? 'Berhasil!' : 'Error!'}</strong> ${message}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
@@ -603,7 +431,167 @@
             if (type === 'success') {
                 setTimeout(function() {
                     $('#alertContainer .alert').alert('close');
-                }, 5000);
+                    clearForm();
+                }, 2000);
+            }
+        }
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+        // Initialize Select2
+        $('.select2-pelanggan').select2({
+            placeholder: "Pilih Pelanggan",
+            allowClear: true,
+            dropdownParent: $('#add')
+        });
+
+        $('.select2-barang').select2({
+            placeholder: "Pilih Barang",
+            allowClear: true,
+            dropdownParent: $('#add')
+        });
+
+        var n = 1;
+        var ls = [];
+
+        $('#addtoList').click(function() {
+            var plg = $("#pelanggan_id").val();
+            var brg = $("#barang_id").val();
+            var sel = $("#barang_id option:selected").text(); // Alternatif cara mendapatkan text
+            var jum = parseInt($("#jumlah_keluar").val());
+            var iduser = $("#id_user").val();
+            var tgl = $("#tanggal_keluar").val();
+            var nosurat = $('#no_surat_keluar').val();
+
+            // Debugging - cek nilai yang didapat
+            // console.log(nosurat);
+
+            // Validasi input
+            if (!plg) {
+                alert('Isikan Pelanggan dengan benar.');
+                return false;
+            }
+
+            if (!brg) {
+                alert('Isikan Barang dengan benar.');
+                return false;
+            }
+
+            if (!jum || jum <= 0) {
+                alert('Isikan Jumlah dengan benar.');
+                return false;
+            }
+
+            var ch = ls.includes(brg);
+
+            $.post(baseurl + 'pelanggan/getstok/' + brg, function(res, status) {
+                var stok = parseInt(res) || 0;
+
+                if (ch) {
+                    // Item sudah ada, update jumlah
+                    var currentJum = parseInt($('#jls-' + brg).val()) || 0;
+                    var newJum = currentJum + jum;
+
+                    if (newJum > stok) {
+                        alert('Maaf sisa stok tidak cukup : ' + stok);
+                        return false;
+                    } else {
+                        $('#jls-' + brg).val(newJum);
+                        $('#jtextls-' + brg).text(newJum);
+                    }
+                } else {
+                    // Item baru
+                    if (jum > stok) {
+                        alert('Maaf sisa stok tidak cukup : ' + stok);
+                        return false;
+                    } else {
+                        ls.push(brg);
+
+                        var nr = `<tr id="trlist-${brg}">
+                        <td>
+                            <input type="hidden" name="tanggal_keluar[${n}]" id="tls-${n}" value="${tgl}">
+                            <input type="hidden" name="id_user[${n}]" id="ils-${n}" value="${iduser}">
+                            <input type="hidden" name="no_surat[${n}]" id="nls-${n}" value="${nosurat}">
+                            <input type="hidden" name="pelanggan_id[${n}]" id="pls-${n}" value="${plg}">
+                            <input type="hidden" name="barang_id[${n}]" id="bls-${n}" value="${brg}">
+                            <input type="hidden" name="jumlah_keluar[${n}]" id="jls-${brg}" value="${jum}">
+                            ${sel}
+                        </td>
+                        <td><span id="jtextls-${brg}">${jum}</span></td>
+                        <td align="center">
+                            <button type="button" onclick="removeList('${brg}')" class="btn btn-sm btn-danger">
+                                <em class="icon ni ni-trash-alt"></em>
+                            </button>
+                        </td>
+                    </tr>`;
+
+                        $('#list').append(nr);
+                        n++;
+                    }
+                }
+
+                // Clear form inputs
+                $('#jumlah_keluar').val('');
+                $('#barang_id').val('').trigger('change');
+
+            }).fail(function() {
+                alert('Error getting stock data');
+            });
+        });
+
+        function removeList(brg) {
+            var brg = brg.toString();
+            var posDel = $.inArray(brg, ls);
+
+            if (posDel > -1) {
+                ls.splice(posDel, 1);
+            }
+
+            $(`#trlist-${brg}`).remove();
+        }
+
+        // Make removeList globally accessible
+        window.removeList = removeList;
+
+        // Event handler untuk select barang - update stok display
+        $('#barang_id').on('change', function() {
+            var selectedOption = $(this).find('option:selected');
+            var stok = selectedOption.data('stok') || 0;
+
+            $('#stok').val(stok);
+
+            // Hitung sisa stok berdasarkan jumlah keluar
+            updateSisaStok();
+
+            // Show/hide warning
+            if (stok <= 5 && stok > 0) {
+                $('#stokWarning').show();
+            } else {
+                $('#stokWarning').hide();
+            }
+        });
+
+        // Event handler untuk jumlah keluar
+        $('#jumlah_keluar').on('input', function() {
+            updateSisaStok();
+        });
+
+        function updateSisaStok() {
+            var stok = parseInt($('#stok').val()) || 0;
+            var jumlahKeluar = parseInt($('#jumlah_keluar').val()) || 0;
+            var sisaStok = stok - jumlahKeluar;
+
+            $('#total_stok').val(sisaStok);
+
+            // Validasi real-time
+            if (sisaStok < 0) {
+                $('#total_stok').addClass('is-invalid');
+                $('#jumlah_keluar').addClass('is-invalid');
+            } else {
+                $('#total_stok').removeClass('is-invalid');
+                $('#jumlah_keluar').removeClass('is-invalid');
             }
         }
     });

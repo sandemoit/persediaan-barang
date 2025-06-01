@@ -81,15 +81,15 @@
                 <th>Satuan</th>
                 <th>Jenis Barang</th>
                 <th>Kondisi Barang</th>
-                <th>Stok Awal</th>
                 <th>Stok</th>
                 <th>Harga</th>
+                <th>Total Harga</th>
             </tr>
         </thead>
         <tbody>
             <?php $no = 1 ?>
             <?php $total = 0;
-            $totalStokAwal = 0;
+            $totalHarga = 0;
             $totalStok = 0 ?> <!-- Deklarasikan variabel $total di sini -->
             <?php foreach ($barang as $row) : ?>
                 <tr>
@@ -100,13 +100,13 @@
                     <td><?= $row['nama_satuan'] ?></td>
                     <td><?= $row['nama_jenis'] ?></td>
                     <td><?= $row['kondisi'] ?></td>
-                    <td><?= $row['stok_awal'] ?></td>
                     <td><?= $row['stok'] ?></td>
-                    <td><?= 'Rp. ' . number_format($row['harga'], 0, ',', '.') ?></td>
+                    <td><?= number_format($row['harga'], 0, ',', '.') ?></td>
+                    <td><?= number_format($row['harga'] * $row['stok'], 0, ',', '.') ?></td>
                 </tr>
                 <?php
                 $total += $row['harga'];
-                $totalStokAwal += $row['stok_awal'];
+                $totalHarga += $row['harga'] * $row['stok'];
                 $totalStok += $row['stok'];
                 ?>
             <?php endforeach ?>
@@ -114,9 +114,9 @@
         <tfoot>
             <tr>
                 <td colspan="7" style="text-align: center;">Total</td>
-                <td><? $totalStokAwal ?></td>
-                <td><? $totalStok ?></td>
-                <td>Rp. <?= number_format($total, 0, ',', '.') ?></td>
+                <td><?= $totalStok ?></td>
+                <td><?= number_format($total, 0, ',', '.') ?></td>
+                <td><?= number_format($totalHarga, 0, ',', '.') ?></td>
             </tr>
         </tfoot>
 

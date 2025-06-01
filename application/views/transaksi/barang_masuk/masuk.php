@@ -108,6 +108,18 @@
                                                     </tr>
                                                 <?php endforeach; ?>
                                             </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <th colspan="4" class="text-center">Total</th>
+                                                    <th class="text-right"><?= array_sum(array_column($barangmasuk, 'jumlah_masuk')) ?></th>
+                                                    <th colspan="2"></th>
+                                                    <th class="text-right"><?= number_format(array_sum(array_column($barangmasuk, 'harga')), 0, ',', '.') ?></th>
+                                                    <th class="text-right"><?= number_format(array_sum(array_map(function ($item) {
+                                                                                return $item['harga'] * $item['jumlah_masuk'];
+                                                                            }, $barangmasuk)), 0, ',', '.') ?></th>
+                                                    <th></th>
+                                                </tr>
+                                            </tfoot>
                                         </table>
                                     </div>
                                 </div><!-- .card-preview -->
