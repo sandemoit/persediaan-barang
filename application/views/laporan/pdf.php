@@ -44,8 +44,9 @@
         <thead>
             <tr>
                 <th>No</th>
-                <th>ID Barang</th>
+                <th>Kode Barang</th>
                 <th>Nama Barang</th>
+                <th>Nama Supplier</th>
                 <th>Stok Awal</th>
                 <th>Jumlah Masuk</th>
                 <th>Jumlah Keluar</th>
@@ -57,8 +58,9 @@
             <?php foreach ($laporan as $item) : ?>
                 <tr>
                     <td><?= $no++; ?></td>
-                    <td><?= $item['id_barang']; ?></td>
+                    <td><?= $item['kode_barang']; ?></td>
                     <td><?= $item['nama_barang']; ?></td>
+                    <td><?= $item['nama_supplier']; ?></td>
                     <td><?= $item['stok_awal']; ?></td>
                     <td><?= (!empty($item['jumlah_masuk'])) ? $item['jumlah_masuk'] : 0; ?></td>
                     <td><?= (!empty($item['jumlah_keluar'])) ? $item['jumlah_keluar'] : 0; ?></td>

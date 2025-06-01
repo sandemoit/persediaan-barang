@@ -103,6 +103,7 @@
                                                     <th>Jumlah</th>
                                                     <th>Pelanggan</th>
                                                     <th>Harga</th>
+                                                    <th>Total Harga</th>
                                                     <th>Aksi</th>
                                                 </tr>
                                             </thead>
@@ -118,6 +119,7 @@
                                                         <td><?= $bk['jumlah_keluar'] ?></td>
                                                         <td><?= $bk['nama'] ?></td>
                                                         <td><?= number_format($bk['harga'], 0, ',', '.') ?></td>
+                                                        <td><?= number_format($bk['harga'] * $bk['jumlah_keluar'], 0, ',', '.') ?></td>
                                                         <td>
                                                             <div class="tb-odr-btns d-none d-md-inline">
                                                                 <a onclick="return confirm('Yakin ingin hapus?')" href="<?= base_url('pelanggan/delete/') . $bk['id_bkeluar'] ?>" class="btn btn-sm btn-danger"><em class="icon ni ni-trash"></em>Delete</a>

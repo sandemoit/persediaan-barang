@@ -232,7 +232,7 @@ class Pelanggan extends CI_Controller
         $sheet = $spreadsheet->getActiveSheet();
 
         // Setel header kolom
-        $headerColumns = ['No', 'ID Barang', 'Nama Barang', 'Jenis', 'Total', 'Tanggal Keluar'];
+        $headerColumns = ['No', 'Kode Barang', 'Nama Barang', 'Jenis', 'Total', 'Tanggal Keluar'];
         foreach ($headerColumns as $key => $header) {
             $column = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($key + 1);
             $sheet->setCellValue($column . '1', $header);
@@ -373,7 +373,7 @@ class Pelanggan extends CI_Controller
         $sheet = $spreadsheet->getActiveSheet();
 
         // Header tanpa kolom Supplier
-        $headerColumns = ['No', 'No Transaksi', 'Tanggal Masuk', 'Nama Barang', 'Jumlah Masuk', 'Pelanggan', 'Harga'];
+        $headerColumns = ['No', 'No Transaksi', 'Tanggal Masuk', 'Nama Barang', 'Jumlah Masuk', 'Pelanggan', 'Harga', 'Total Harga'];
 
         foreach ($headerColumns as $key => $header) {
             $column = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($key + 1);
@@ -393,6 +393,7 @@ class Pelanggan extends CI_Controller
         }
 
         $row = 2;
+        $totalHarga = 0;
         foreach ($dataBarang as $key => $item) {
             $sheet->setCellValue('A' . $row, $key + 1); // No
             $sheet->setCellValue('B' . $row, $item['id_bkeluar']); // No Transaksi
@@ -401,8 +402,11 @@ class Pelanggan extends CI_Controller
             $sheet->setCellValue('E' . $row, $item['jumlah_keluar']); // Jumlah keluar
             $sheet->setCellValue('F' . $row, $item['nama']); // Pelanggan
             $sheet->setCellValue('G' . $row, $item['harga']); // Harga
+            $sheet->setCellValue('H' . $row, '=G' . $row . '*E' . $row); // Total Harga
 
-            $sheet->getStyle('A' . $row . ':G' . $row)->applyFromArray([
+            $totalHarga += $item['harga'] * $item['jumlah_keluar'];
+
+            $sheet->getStyle('A' . $row . ':H' . $row)->applyFromArray([
                 'alignment' => ['vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
                 'borders' => array_fill_keys(['top', 'right', 'bottom', 'left'], ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN])
             ]);
@@ -416,15 +420,16 @@ class Pelanggan extends CI_Controller
         // Format harga
         $sheet->getStyle('G2:G' . ($row - 1))->getNumberFormat()->setFormatCode('#,##0');
 
-        // Total Jumlah & Harga
-        $sheet->setCellValue('E' . $row, "=SUM(E2:E" . ($row - 1) . ")");
-        $sheet->setCellValue('G' . $row, "=SUM(G2:G" . ($row - 1) . ")");
-
         // Label TOTAL
         $sheet->mergeCells('A' . $row . ':D' . $row);
         $sheet->setCellValue('A' . $row, 'TOTAL:');
 
-        $sheet->getStyle('A' . $row . ':G' . $row)->applyFromArray([
+        // Total Jumlah & Harga
+        $sheet->setCellValue('E' . $row, "=SUM(E2:E" . ($row - 1) . ")");
+        $sheet->setCellValue('G' . $row, "=SUM(G2:G" . ($row - 1) . ")");
+        $sheet->setCellValue('H' . $row, "=SUM(H2:H" . ($row - 1) . ")");
+
+        $sheet->getStyle('A' . $row . ':H' . $row)->applyFromArray([
             'font' => ['bold' => true],
             'alignment' => [
                 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
@@ -439,9 +444,10 @@ class Pelanggan extends CI_Controller
 
         $sheet->getStyle('E' . $row)->getNumberFormat()->setFormatCode('#,##0');
         $sheet->getStyle('G' . $row)->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->getStyle('H' . $row)->getNumberFormat()->setFormatCode('#,##0');
 
         // Auto-width kolom A sampai G
-        foreach (range('A', 'G') as $col) {
+        foreach (range('A', 'H') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 

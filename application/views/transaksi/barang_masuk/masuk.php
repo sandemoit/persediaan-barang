@@ -83,6 +83,7 @@
                                                     <th>Supplier</th>
                                                     <th>Petugas</th>
                                                     <th>Harga</th>
+                                                    <th>Total Harga</th>
                                                     <th>Aksi</th>
                                                 </tr>
                                             </thead>
@@ -97,6 +98,7 @@
                                                         <td><?= $bm['jumlah_masuk'] ?></td>
                                                         <td><?= $bm['nama_supplier'] ?></td>
                                                         <td><?= $bm['name'] ?></td>
+                                                        <td><?= number_format($bm['harga'], 0, ',', '.') ?></td>
                                                         <td><?= number_format($bm['harga'] * $bm['jumlah_masuk'], 0, ',', '.') ?></td>
                                                         <td>
                                                             <div class="tb-odr-btns d-none d-md-inline">

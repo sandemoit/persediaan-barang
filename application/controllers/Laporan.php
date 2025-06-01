@@ -57,7 +57,7 @@ class Laporan extends CI_Controller
         $sheet = $spreadsheet->getActiveSheet();
 
         // Setel header kolom
-        $headerColumns = ['No', 'ID Barang', 'Nama Barang', 'Stok Awal', 'Jumlah Masuk', 'Jumlah Keluar', 'Total Stok'];
+        $headerColumns = ['No', 'Kode Barang', 'Nama Barang', 'Nama Supplier', 'Stok Awal', 'Jumlah Masuk', 'Jumlah Keluar', 'Total Stok'];
         foreach ($headerColumns as $key => $header) {
             $column = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($key + 1);
             $sheet->setCellValue($column . '1', $header);
@@ -88,10 +88,11 @@ class Laporan extends CI_Controller
             $sheet->setCellValue('A' . $row, $key + 1);
             $sheet->setCellValue('B' . $row, $item['kode_barang']);
             $sheet->setCellValue('C' . $row, $item['nama_barang']);
-            $sheet->setCellValue('D' . $row, $item['stok_awal']);
-            $sheet->setCellValue('E' . $row, $item['jumlah_masuk']);
-            $sheet->setCellValue('F' . $row, $item['jumlah_keluar']);
-            $sheet->setCellValue('G' . $row, $item['stok']);
+            $sheet->setCellValue('D' . $row, $item['nama_supplier']);
+            $sheet->setCellValue('E' . $row, $item['stok_awal']);
+            $sheet->setCellValue('F' . $row, $item['jumlah_masuk']);
+            $sheet->setCellValue('G' . $row, $item['jumlah_keluar']);
+            $sheet->setCellValue('H' . $row, $item['stok']);
 
             // Terapkan gaya baris
             $style_row = [
@@ -103,13 +104,13 @@ class Laporan extends CI_Controller
                     'left' => ['borderStyle'  => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN]
                 ]
             ];
-            $sheet->getStyle('A' . $row . ':G' . $row)->applyFromArray($style_row);
+            $sheet->getStyle('A' . $row . ':H' . $row)->applyFromArray($style_row);
 
             $row++;
         }
 
         // Set lebar kolom
-        foreach (range('A', 'G') as $column) {
+        foreach (range('A', 'H') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 

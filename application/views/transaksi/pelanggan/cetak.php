@@ -81,11 +81,13 @@
                 <th>Jumlah Keluar</th>
                 <th>Pelanggan</th>
                 <th>Harga</th>
+                <th>Total Harga</th>
             </tr>
         </thead>
         <tbody>
             <?php $no = 1 ?>
             <?php $total = 0;
+            $totalHarga = 0;
             $jmlKeluar = 0 ?> <!-- Deklarasikan variabel $total di sini -->
             <?php foreach ($barang as $row) : ?>
                 <tr>
@@ -95,10 +97,12 @@
                     <td><?= $row['nama_barang'] ?></td>
                     <td><?= $row['jumlah_keluar'] ?></td>
                     <td><?= $row['nama'] ?></td>
-                    <td><?= 'Rp. ' . number_format($row['harga'], 0, ',', '.') ?></td>
+                    <td><?= number_format($row['harga'], 0, ',', '.') ?></td>
+                    <td><?= number_format($row['harga'] * $row['jumlah_keluar'], 0, ',', '.') ?></td>
                 </tr>
                 <?php
                 $total += $row['harga'];
+                $totalHarga += $row['harga'] * $row['jumlah_keluar'];
                 $jmlKeluar += $row['jumlah_keluar'];
                 ?>
             <?php endforeach ?>
@@ -108,7 +112,8 @@
                 <td colspan="4" style="text-align: center;">Total</td>
                 <td><?= $jmlKeluar ?></td>
                 <td colspan="1"></td>
-                <td>Rp. <?= number_format($total, 0, ',', '.') ?></td>
+                <td><?= number_format($total, 0, ',', '.') ?></td>
+                <td><?= number_format($totalHarga, 0, ',', '.') ?></td>
             </tr>
         </tfoot>
 

@@ -31,13 +31,14 @@ class Laporan_model extends CI_Model
 
     public function getLaporanData($startDate = null, $endDate = null)
     {
-        $this->db->select('barang.id_barang, nama_barang, stok_awal, stok, kode_barang');
+        $this->db->select('barang.id_barang, nama_barang, stok_awal, stok, kode_barang, suplier.nama_supplier');
         $this->db->select('IFNULL(SUM(jumlah_masuk), 0) AS jumlah_masuk', false);
         $this->db->select('IFNULL(SUM(jumlah_keluar), 0) AS jumlah_keluar', false);
 
         $this->db->from('barang');
         $this->db->join('barang_masuk', 'barang.kode_barang = barang_masuk.barang_id', 'left');
         $this->db->join('barang_keluar', 'barang.kode_barang = barang_keluar.barang_id', 'left');
+        $this->db->join('suplier', 'barang.id_supplier = suplier.id', 'left');
 
         if ($startDate && $endDate) {
             $this->db->group_start()
@@ -48,7 +49,7 @@ class Laporan_model extends CI_Model
                 ->group_end();
         }
 
-        $this->db->group_by('barang.id_barang, nama_barang, stok_awal, stok');
+        $this->db->group_by('barang.id_barang, nama_barang, stok_awal, stok, suplier.nama_supplier');
         $query = $this->db->get();
         return $query->result_array();
     }

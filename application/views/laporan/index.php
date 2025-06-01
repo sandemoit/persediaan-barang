@@ -62,8 +62,9 @@
                                 <thead>
                                     <tr>
                                         <th>No</th>
-                                        <th>ID Barang</th>
+                                        <th>Kode Barang</th>
                                         <th>Nama Barang</th>
+                                        <th>Nama Supplier</th>
                                         <th>Jumlah stok awal</th>
                                         <th>Jumlah Barang Masuk</th>
                                         <th>Jumlah Barang Keluar</th>
@@ -77,6 +78,7 @@
                                             <td><?= $no++; ?></td>
                                             <td><?= $item['kode_barang']; ?></td>
                                             <td><?= $item['nama_barang']; ?></td>
+                                            <td><?= $item['nama_supplier']; ?></td>
                                             <td><?= $item['stok_awal']; ?></td>
                                             <td><?= (!empty($item['jumlah_masuk'])) ? $item['jumlah_masuk'] : 0; ?></td>
                                             <td><?= (!empty($item['jumlah_keluar'])) ? $item['jumlah_keluar'] : 0; ?></td>

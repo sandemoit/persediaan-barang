@@ -99,7 +99,7 @@ class Masuk extends CI_Controller
         $sheet = $spreadsheet->getActiveSheet();
 
         // Set header columns according to requested format
-        $headerColumns = ['No', 'No Transaksi', 'Tanggal Masuk', 'Nama Barang', 'Jumlah Masuk', 'Supplier', 'Petugas', 'Harga'];
+        $headerColumns = ['No', 'No Transaksi', 'Tanggal Masuk', 'Nama Barang', 'Jumlah Masuk', 'Supplier', 'Petugas', 'Harga', 'Total Harga'];
 
         foreach ($headerColumns as $key => $header) {
             $column = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($key + 1);
@@ -128,8 +128,9 @@ class Masuk extends CI_Controller
             $sheet->setCellValue('F' . $row, $item['nama_supplier']); // Supplier
             $sheet->setCellValue('G' . $row, $item['name']); // Petugas (assuming 'name' is the staff name)
             $sheet->setCellValue('H' . $row, $item['harga']); // Harga
+            $sheet->setCellValue('I' . $row, $item['harga'] * $item['jumlah_masuk']); // Total Harga
 
-            $sheet->getStyle('A' . $row . ':H' . $row)->applyFromArray([
+            $sheet->getStyle('A' . $row . ':I' . $row)->applyFromArray([
                 'alignment' => ['vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER],
                 'borders' => array_fill_keys(['top', 'right', 'bottom', 'left'], ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN])
             ]);
@@ -142,16 +143,18 @@ class Masuk extends CI_Controller
 
         // Format harga
         $sheet->getStyle('H2:H' . ($row - 1))->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->getStyle('I2:I' . ($row - 1))->getNumberFormat()->setFormatCode('#,##0');
 
         // Total untuk Jumlah Masuk dan Harga
         $sheet->setCellValue('E' . $row, "=SUM(E2:E" . ($row - 1) . ")");
         $sheet->setCellValue('H' . $row, "=SUM(H2:H" . ($row - 1) . ")");
+        $sheet->setCellValue('I' . $row, "=SUM(I2:I" . ($row - 1) . ")");
 
         // Label TOTAL
         $sheet->mergeCells('A' . $row . ':D' . $row);
         $sheet->setCellValue('A' . $row, 'TOTAL:');
 
-        $sheet->getStyle('A' . $row . ':H' . $row)->applyFromArray([
+        $sheet->getStyle('A' . $row . ':I' . $row)->applyFromArray([
             'font' => ['bold' => true],
             'alignment' => [
                 'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
@@ -167,9 +170,10 @@ class Masuk extends CI_Controller
         // Format total row for numbers
         $sheet->getStyle('E' . $row)->getNumberFormat()->setFormatCode('#,##0');
         $sheet->getStyle('H' . $row)->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->getStyle('I' . $row)->getNumberFormat()->setFormatCode('#,##0');
 
         // Auto-width semua kolom
-        foreach (range('A', 'H') as $col) {
+        foreach (range('A', 'I') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
