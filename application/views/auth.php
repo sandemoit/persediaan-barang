@@ -34,7 +34,7 @@
                             <div class="card-inner card-inner-lg">
                                 <div class="nk-block-head">
                                     <div class="nk-block-head-content">
-                                        <h4 class="nk-block-title">Sign-In <?= $setting['nama_perusahaan'] ?></h4>
+                                        <h4 class="nk-block-title">Sign-In <br><?= $setting['nama_perusahaan'] ?></h4>
                                         <div class="nk-block-des">
                                             <p>Access <?= setting('nama_aplikasi'); ?></p>
                                         </div>
@@ -47,7 +47,7 @@
                                             <label class="form-label" for="default-01">Email</label>
                                         </div>
                                         <div class="form-control-wrap">
-                                            <input type="text" value="admin@gmail.com" class="form-control form-control-lg" name="email" id="default-01" placeholder="Enter your email address">
+                                            <input type="text" class="form-control form-control-lg" name="email" id="default-01" placeholder="Enter your email address">
                                         </div>
                                         <?= form_error('email', '<small class="text-danger" pl-3>', '</small>'); ?>
                                     </div>
@@ -60,7 +60,7 @@
                                                 <em class="passcode-icon icon-show icon ni ni-eye"></em>
                                                 <em class="passcode-icon icon-hide icon ni ni-eye-off"></em>
                                             </a>
-                                            <input type="password" value="admin" class="form-control form-control-lg" name="password" id="password" placeholder="Enter your password">
+                                            <input type="password" class="form-control form-control-lg" name="password" id="password" placeholder="Enter your password">
                                         </div>
                                         <?= form_error('password', '<small class="text-danger" pl-3>', '</small>'); ?>
                                     </div>
