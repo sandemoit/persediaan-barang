@@ -131,6 +131,18 @@
                                                     </tr>
                                                 <?php endforeach; ?>
                                             </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <th colspan="5" class="text-center">Total</th>
+                                                    <th class="text-right"><?= array_sum(array_column($transaksi, 'jumlah_keluar')) ?></th>
+                                                    <th colspan="1"></th>
+                                                    <th class="text-right"><?= number_format(array_sum(array_column($transaksi, 'harga')), 0, ',', '.') ?></th>
+                                                    <th class="text-right"><?= number_format(array_sum(array_map(function ($item) {
+                                                                                return $item['harga'] * $item['jumlah_keluar'];
+                                                                            }, $transaksi)), 0, ',', '.') ?></th>
+                                                    <th></th>
+                                                </tr>
+                                            </tfoot>
                                         </table>
                                     </div>
                                 </div><!-- .card-preview -->
