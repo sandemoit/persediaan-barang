@@ -95,7 +95,7 @@ class Keluar extends CI_Controller
     }
 
     /**
-     * Controller method untuk unduh surat - hanya berdasarkan nomor surat
+     * Controller method untuk unduh surat - dengan pilihan nomor surat atau rentang tanggal
      */
     public function unduhSurat()
     {
@@ -103,15 +103,34 @@ class Keluar extends CI_Controller
         header('Content-Type: application/json');
 
         try {
-            $no_surat = $this->input->post('no_surat');
+            $method = $this->input->post('method');
 
-            // Validasi input
-            if (empty($no_surat)) {
-                throw new Exception('Nomor surat harus dipilih untuk mengunduh');
+            // Validasi method
+            if (empty($method) || !in_array($method, ['no_surat', 'tanggal'])) {
+                throw new Exception('Metode download tidak valid');
             }
 
-            // Proses unduh berdasarkan nomor surat
-            $result = $this->downloadSuratByNumber($no_surat);
+            // Proses berdasarkan method yang dipilih
+            if ($method === 'no_surat') {
+                $no_surat = $this->input->post('no_surat');
+                if (empty($no_surat)) {
+                    throw new Exception('Nomor surat harus dipilih untuk mengunduh');
+                }
+                $result = $this->downloadSuratByNumber($no_surat);
+            } else if ($method === 'tanggal') {
+                $tanggal_mulai = $this->input->post('tanggal_mulai');
+                $tanggal_selesai = $this->input->post('tanggal_selesai');
+
+                if (empty($tanggal_mulai) || empty($tanggal_selesai)) {
+                    throw new Exception('Rentang tanggal harus dipilih untuk mengunduh');
+                }
+
+                if ($tanggal_mulai > $tanggal_selesai) {
+                    throw new Exception('Tanggal mulai tidak boleh lebih besar dari tanggal selesai');
+                }
+
+                $result = $this->downloadSuratByDateRange($tanggal_mulai, $tanggal_selesai);
+            }
 
             // Return JSON response
             echo json_encode($result);
@@ -128,7 +147,7 @@ class Keluar extends CI_Controller
     }
 
     /**
-     * Method untuk download surat berdasarkan nomor surat saja
+     * Method untuk download surat berdasarkan nomor surat saja (tidak berubah)
      */
     private function downloadSuratByNumber($no_surat)
     {
@@ -163,7 +182,52 @@ class Keluar extends CI_Controller
     }
 
     /**
-     * Method untuk mengambil data berdasarkan nomor surat saja
+     * Method untuk download surat berdasarkan rentang tanggal
+     */
+    private function downloadSuratByDateRange($tanggal_mulai, $tanggal_selesai)
+    {
+        try {
+            // Ambil data berdasarkan rentang tanggal
+            $data = $this->getDataByDateRange($tanggal_mulai, $tanggal_selesai);
+
+            if (empty($data)) {
+                throw new Exception('Data tidak ditemukan untuk rentang tanggal: ' . $tanggal_mulai . ' s/d ' . $tanggal_selesai);
+            }
+
+            // Group data berdasarkan nomor surat
+            $grouped_data = $this->groupDataByNoSurat($data);
+
+            // Generate filename dan title
+            $filename = 'surat-keluar-periode-' . $tanggal_mulai . '-sd-' . $tanggal_selesai . '-' . date('Y-m-d-H-i-s') . '.pdf';
+            $title = 'Surat Keluar Periode ' . date('d/m/Y', strtotime($tanggal_mulai)) . ' s/d ' . date('d/m/Y', strtotime($tanggal_selesai));
+
+            // Generate PDF dengan multiple pages (satu page per nomor surat)
+            $file_info = $this->generatePDFFileByDateRange($grouped_data, $filename, $title, $tanggal_mulai, $tanggal_selesai);
+
+            $total_items = 0;
+            foreach ($grouped_data as $group) {
+                $total_items += count($group['items']);
+            }
+
+            $result = [
+                'success' => true,
+                'message' => 'File PDF berhasil dibuat dan siap diunduh',
+                'download_url' => base_url('keluar/downloadFile/' . urlencode($filename)),
+                'filename' => $filename,
+                'file_size' => $this->formatBytes(filesize($file_info['path'])),
+                'total_items' => $total_items,
+                'total_surat' => count($grouped_data),
+                'periode' => $tanggal_mulai . ' s/d ' . $tanggal_selesai
+            ];
+
+            return $result;
+        } catch (Exception $e) {
+            throw new Exception($e->getMessage());
+        }
+    }
+
+    /**
+     * Method untuk mengambil data berdasarkan nomor surat saja (tidak berubah)
      */
     private function getDataByNoSurat($no_surat)
     {
@@ -195,7 +259,68 @@ class Keluar extends CI_Controller
     }
 
     /**
-     * Method untuk generate PDF file (updated)
+     * Method untuk mengambil data berdasarkan rentang tanggal
+     */
+    private function getDataByDateRange($tanggal_mulai, $tanggal_selesai)
+    {
+        // Query untuk mendapatkan semua data berdasarkan rentang tanggal
+        $this->db->select('
+        bk.id_bkeluar,
+        bk.no_surat,
+        bk.jumlah_keluar,
+        bk.tanggal_keluar,
+        b.kode_barang,
+        b.nama_barang,
+        p.nama as nama_pelanggan,
+        p.kode_toko,
+        p.alamat,
+        s.nama_satuan
+    ');
+        $this->db->from('barang_keluar bk');
+        $this->db->join('barang b', 'bk.barang_id = b.kode_barang', 'left');
+        $this->db->join('pelanggan p', 'bk.pelanggan_id = p.id_pelanggan', 'left');
+        $this->db->join('satuan s', 'b.id_satuan = s.id', 'left');
+        $this->db->where('bk.tanggal_keluar >=', $tanggal_mulai);
+        $this->db->where('bk.tanggal_keluar <=', $tanggal_selesai);
+        $this->db->order_by('bk.tanggal_keluar', 'ASC');
+        $this->db->order_by('bk.no_surat', 'ASC');
+        $this->db->order_by('bk.id_bkeluar', 'ASC');
+
+        $query = $this->db->get();
+        $result = $query->result_array();
+
+        return $result;
+    }
+
+    /**
+     * Method untuk grouping data berdasarkan nomor surat
+     */
+    private function groupDataByNoSurat($data)
+    {
+        $grouped = [];
+
+        foreach ($data as $item) {
+            $no_surat = $item['no_surat'];
+
+            if (!isset($grouped[$no_surat])) {
+                $grouped[$no_surat] = [
+                    'no_surat' => $no_surat,
+                    'tanggal_keluar' => $item['tanggal_keluar'],
+                    'nama_pelanggan' => $item['nama_pelanggan'],
+                    'kode_toko' => $item['kode_toko'],
+                    'alamat' => $item['alamat'],
+                    'items' => []
+                ];
+            }
+
+            $grouped[$no_surat]['items'][] = $item;
+        }
+
+        return array_values($grouped);
+    }
+
+    /**
+     * Method untuk generate PDF file untuk single nomor surat (tidak berubah)
      */
     private function generatePDFFile($data, $filename, $title, $no_surat = null)
     {
@@ -216,6 +341,74 @@ class Keluar extends CI_Controller
 
         // Load view dan convert ke string
         $html = $this->load->view('transaksi/pelanggan/cetak-surat', $pdf_data, TRUE);
+
+        // Konfigurasi DomPDF
+        $options = new Options();
+        $options->set('isRemoteEnabled', true);
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('defaultFont', 'Arial');
+
+        // Inisialisasi DomPDF
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A5', 'landscape');
+        $dompdf->render();
+
+        // Pastikan folder downloads ada
+        $upload_path = FCPATH . 'downloads/';
+        if (!is_dir($upload_path)) {
+            mkdir($upload_path, 0755, true);
+        }
+
+        // Simpan PDF ke file
+        $file_path = $upload_path . $filename;
+        file_put_contents($file_path, $dompdf->output());
+
+        return [
+            'path' => $file_path,
+            'filename' => $filename
+        ];
+    }
+
+    /**
+     * Method untuk generate PDF file untuk multiple nomor surat (berdasarkan rentang tanggal)
+     */
+    private function generatePDFFileByDateRange($grouped_data, $filename, $title, $tanggal_mulai, $tanggal_selesai)
+    {
+        // Ambil setting perusahaan
+        $setting = $this->Other_model->getSetting();
+
+        // Siapkan HTML untuk semua surat
+        $html = '';
+        $page_break = '<div style="page-break-after: always;"></div>';
+
+        foreach ($grouped_data as $index => $group) {
+            // Siapkan data untuk view setiap nomor surat
+            $pdf_data = [
+                'title' => 'Surat Keluar - ' . $group['no_surat'],
+                'data' => $group['items'],
+                'no_surat' => $group['no_surat'],
+                'setting' => $setting,
+                'nama_pelanggan' => $group['nama_pelanggan'],
+                'alamat_pelanggan' => $group['alamat'],
+                'generated_date' => date('d/m/Y H:i:s'),
+                'total_items' => count($group['items']),
+                'periode_info' => [
+                    'tanggal_mulai' => $tanggal_mulai,
+                    'tanggal_selesai' => $tanggal_selesai,
+                    'is_periode' => true
+                ]
+            ];
+
+            // Load view untuk setiap nomor surat
+            $page_html = $this->load->view('transaksi/pelanggan/cetak-surat', $pdf_data, TRUE);
+            $html .= $page_html;
+
+            // Tambahkan page break kecuali untuk halaman terakhir
+            if ($index < count($grouped_data) - 1) {
+                $html .= $page_break;
+            }
+        }
 
         // Konfigurasi DomPDF
         $options = new Options();
@@ -286,7 +479,7 @@ class Keluar extends CI_Controller
     }
 
     /**
-     * Method untuk format ukuran file
+     * Method untuk format ukuran file (tetap sama)
      */
     private function formatBytes($size, $precision = 2)
     {
@@ -298,7 +491,7 @@ class Keluar extends CI_Controller
     }
 
     /**
-     * Method untuk cleanup file lama (opsional)
+     * Method untuk cleanup file lama (tetap sama)
      */
     public function cleanupOldFiles()
     {

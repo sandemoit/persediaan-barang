@@ -6,6 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?></title>
     <style>
+        @page {
+            margin: 15mm;
+            size: A5 landscape;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,11 +18,10 @@
         }
 
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'DejaVu Sans', Arial, sans-serif;
             font-size: 11px;
-            line-height: 1.2;
-            background-color: #f5f5f5;
-            padding: 20px;
+            line-height: 1.3;
+            color: #000;
         }
 
         .detail-content {
@@ -31,29 +35,32 @@
             flex-direction: column;
         }
 
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
-            gap: 15px;
+        /* Header menggunakan table untuk kompatibilitas DomPDF */
+        .card-header-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 12px;
+        }
+
+        .card-header-table td {
+            border: none;
+            padding: 5px;
+            vertical-align: top;
         }
 
         .company-info {
-            flex: 1;
-            font-size: 12px;
-            line-height: 1.3;
+            width: 35%;
+            font-size: 11px;
         }
 
         .company-info h3 {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
-            margin-bottom: 8px;
-            color: #000;
+            margin-bottom: 6px;
         }
 
         .card-title {
-            flex: 0 0 200px;
+            width: 30%;
             text-align: center;
             border: 1px solid #000;
             padding: 8px;
@@ -61,20 +68,19 @@
         }
 
         .card-title h2 {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
 
         .card-title .doc-number {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
         }
 
         .recipient-info {
-            flex: 1;
-            font-size: 12px;
-            line-height: 1.4;
+            width: 35%;
+            font-size: 11px;
         }
 
         .recipient-info strong {
@@ -82,7 +88,7 @@
         }
 
         .nomor-surat {
-            margin: 15px 0;
+            margin: 12px 0;
             padding: 8px;
             border: 1px solid #000;
             background-color: #f9f9f9;
@@ -94,47 +100,56 @@
             font-size: 12px;
         }
 
-        table {
+        /* Table styling untuk data barang */
+        .data-table {
             width: 100%;
             border-collapse: collapse;
             margin: 10px 0;
-            font-size: 12px;
+            font-size: 11px;
         }
 
-        th {
+        .data-table th {
             background-color: #e0e0e0;
             font-weight: bold;
-            padding: 6px 4px;
+            padding: 8px 4px;
             border: 1px solid #000;
-            text-align: center;
-            font-size: 12px;
-        }
-
-        td {
-            border: 1px solid #000;
-            padding: 4px;
-            text-align: left;
-            vertical-align: middle;
-        }
-
-        td:first-child {
-            text-align: center;
-            width: 40px;
-        }
-
-        td:nth-child(2) {
-            width: 80px;
-            text-align: center;
-        }
-
-        td:nth-child(4) {
             text-align: center;
             font-size: 11px;
         }
 
-        td:last-child {
+        .data-table td {
+            border: 1px solid #000;
+            padding: 6px 4px;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        .data-table .text-center {
             text-align: center;
-            width: 80px;
+        }
+
+        .data-table .no-col {
+            width: 8%;
+            text-align: center;
+        }
+
+        .data-table .kode-col {
+            width: 18%;
+            text-align: center;
+        }
+
+        .data-table .nama-col {
+            width: 40%;
+        }
+
+        .data-table .jumlah-col {
+            width: 17%;
+            text-align: center;
+        }
+
+        .data-table .tanggal-col {
+            width: 17%;
+            text-align: center;
         }
 
         .summary-row {
@@ -143,94 +158,96 @@
         }
 
         .note {
-            font-size: 11px;
-            margin: 15px 0;
+            font-size: 10px;
+            margin: 12px 0;
             padding: 8px 0;
             border-bottom: 1px solid #000;
             text-align: left;
         }
 
-        .card-footer {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
-            gap: 20px;
+        /* Footer signatures menggunakan table */
+        .signature-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
         }
 
-        .signature-box {
-            flex: 1;
+        .signature-table td {
+            border: none;
+            padding: 5px;
             text-align: center;
-            font-size: 12px;
+            width: 25%;
+            font-size: 11px;
+            vertical-align: top;
         }
 
-        .signature-box .title {
-            margin-bottom: 40px;
+        .signature-title {
+            margin-bottom: 35px;
             font-weight: bold;
         }
 
         .signature-line {
             border-bottom: 1px solid #000;
-            width: 120px;
+            width: 80px;
             margin: 0 auto;
+            height: 1px;
         }
 
         .meta-info {
-            font-size: 10px;
-            color: #666;
+            font-size: 9px;
+            color: #333;
             text-align: right;
-            margin-top: 10px;
+            margin-top: 8px;
         }
 
-        /* Responsive adjustments */
-        @media print {
-            body {
-                padding: 0;
-                background-color: white;
-            }
-
-            .detail-content {
-                box-shadow: none;
-                border: 1px solid #000;
-            }
+        /* Specific fixes untuk DomPDF */
+        .clearfix::after {
+            content: "";
+            display: table;
+            clear: both;
         }
     </style>
 </head>
 
 <body>
     <div class="detail-content">
-        <div class="card-header">
-            <div class="company-info">
-                <h3><?php echo isset($setting['nama_perusahaan']) ? $setting['nama_perusahaan'] : 'NAMA PERUSAHAAN' ?></h3>
-                <?php echo isset($setting['alamat']) ? $setting['alamat'] : 'Alamat Perusahaan' ?><br />
-                <?php if (isset($setting['telepon']) && !empty($setting['telepon'])): ?>
-                    Telp: <?php echo $setting['telepon'] ?><br />
-                <?php endif ?>
-            </div>
-            <div class="card-title">
-                <h2>TANDA TERIMA</h2>
-                <div class="doc-number"><?= $no_surat ?></div>
-            </div>
-            <div class="recipient-info">
-                <strong>Tanggal:</strong> <?= $generated_date ?><br />
-                <strong>Kepada:</strong> <?= $nama_pelanggan ?><br />
-                <?php if (!empty($alamat_pelanggan)): ?>
-                    <strong>Alamat:</strong> <?= $alamat_pelanggan ?>
-                <?php endif ?>
-            </div>
-        </div>
+        <!-- Header menggunakan table untuk kompatibilitas -->
+        <table class="card-header-table">
+            <tr>
+                <td class="company-info">
+                    <h3><?php echo isset($setting['nama_perusahaan']) ? $setting['nama_perusahaan'] : 'NAMA PERUSAHAAN' ?></h3>
+                    <?php echo isset($setting['alamat']) ? $setting['alamat'] : 'Alamat Perusahaan' ?><br />
+                    <?php if (isset($setting['telepon']) && !empty($setting['telepon'])): ?>
+                        Telp: <?php echo $setting['telepon'] ?><br />
+                    <?php endif ?>
+                </td>
+                <td class="card-title">
+                    <h2>TANDA TERIMA</h2>
+                    <div class="doc-number"><?= $no_surat ?></div>
+                </td>
+                <td class="recipient-info">
+                    <strong>Tanggal:</strong> <?= $generated_date ?><br />
+                    <strong>Kepada:</strong> <?= $nama_pelanggan ?><br />
+                    <?php if (!empty($alamat_pelanggan)): ?>
+                        <strong>Alamat:</strong> <?= $alamat_pelanggan ?>
+                    <?php endif ?>
+                </td>
+            </tr>
+        </table>
 
-        <div class="nomor-surat">
+        <!-- <div class="nomor-surat">
             <strong>Nomor Surat: <?= $no_surat ?></strong>
-        </div>
+        </div> -->
 
-        <table>
+        <!-- Data table -->
+        <table class="data-table">
             <thead>
                 <tr>
-                    <th>NO.</th>
-                    <th>KODE BARANG</th>
-                    <th>NAMA BARANG</th>
-                    <th>JUMLAH</th>
-                    <th>TANGGAL</th>
+                    <th class="no-col">NO.</th>
+                    <th class="kode-col">KODE BARANG</th>
+                    <th class="nama-col">NAMA BARANG</th>
+                    <th class="jumlah-col">JUMLAH</th>
+                    <th class="tanggal-col">TANGGAL</th>
                 </tr>
             </thead>
             <tbody>
@@ -242,7 +259,7 @@
                 ?>
                     <tr>
                         <td class="text-center"><?= $no++ ?></td>
-                        <td><?= $row['kode_barang'] ?></td>
+                        <td class="text-center"><?= $row['kode_barang'] ?></td>
                         <td><?= $row['nama_barang'] ?></td>
                         <td class="text-center">
                             <?= number_format($row['jumlah_keluar'], 0, ',', '.') ?>
@@ -262,30 +279,30 @@
         </table>
 
         <div class="note">
-            <strong>Catatan:</strong><br>
-            • Pastikan barang yang diterima sudah sesuai dengan daftar di atas<br>
-            • Batas waktu koreksi s.d tanggal: <?= date('d/m/Y', strtotime('+7 days')) ?><br>
-            • Hubungi kami jika ada ketidaksesuaian
+            <strong>Catatan:</strong> Pastikan barang yang diterima sudah sesuai dengan daftar di atas, batas waktu koreksi s.d tanggal <?= date('d/m/Y', strtotime('+7 days')) ?>
         </div>
 
-        <div class="card-footer">
-            <div class="signature-box">
-                <div class="title">Diterima oleh,</div>
-                <div class="signature-line"></div>
-            </div>
-            <div class="signature-box">
-                <div class="title">Diserahkan oleh,</div>
-                <div class="signature-line"></div>
-            </div>
-            <div class="signature-box">
-                <div class="title">Disiapkan oleh,</div>
-                <div class="signature-line"></div>
-            </div>
-            <div class="signature-box">
-                <div class="title">Disetujui oleh,</div>
-                <div class="signature-line"></div>
-            </div>
-        </div>
+        <!-- Signature menggunakan table -->
+        <table class="signature-table">
+            <tr>
+                <td>
+                    <div class="signature-title">Diterima oleh,</div>
+                    <div class="signature-line"></div>
+                </td>
+                <td>
+                    <div class="signature-title">Diserahkan oleh,</div>
+                    <div class="signature-line"></div>
+                </td>
+                <td>
+                    <div class="signature-title">Disiapkan oleh,</div>
+                    <div class="signature-line"></div>
+                </td>
+                <td>
+                    <div class="signature-title">Disetujui oleh,</div>
+                    <div class="signature-line"></div>
+                </td>
+            </tr>
+        </table>
 
         <div class="meta-info">
             Dicetak pada: <?= $generated_date ?> | Total Item: <?= isset($total_items) ? $total_items : count($data) ?>

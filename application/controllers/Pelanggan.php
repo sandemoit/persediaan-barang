@@ -114,7 +114,7 @@ class Pelanggan extends CI_Controller
         $this->db->group_by('no_surat');
         $data['surat'] = $this->db->get('barang_keluar')->result_array();
 
-        $data['no_surat'] = 'SJ-' . random_string('numeric', 9);
+        $data['no_surat'] = 'ST-' . random_string('numeric', 9);
 
         if ($this->input->post() == false) {
             $this->load->view('template/header', $data);

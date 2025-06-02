@@ -156,64 +156,6 @@
 </div>
 <!-- content @e -->
 
-<!-- Modal Unduh Surat -->
-<div class="modal fade" tabindex="-1" id="unduh-surat">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Unduh Surat Keluar</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="form-control-wrap">
-                                <label class="form-label" for="no_surat_select">No Surat <span class="text-danger">*</span></label>
-                                <div class="input-group">
-                                    <select name="no_surat" id="no_surat_select" class="form-select">
-                                        <option selected disabled value="">Pilih No Surat</option>
-                                        <?php foreach ($surat as $s): ?>
-                                            <option value="<?= $s['no_surat'] ?>"><?= $s['no_surat'] . ' | ' . $s['tanggal_keluar'] ?></option>
-                                        <?php endforeach ?>
-                                    </select>
-                                </div>
-                                <div class="form-text text-muted">Pilih nomor surat yang ingin diunduh</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Info text -->
-                    <div class="alert alert-info mt-3">
-                        <strong>Informasi:</strong><br>
-                        • Pilih nomor surat untuk mengunduh semua data terkait nomor surat tersebut<br>
-                        • File akan diunduh dalam format PDF<br>
-                        • File akan otomatis terhapus setelah diunduh
-                    </div>
-                </div>
-
-                <!-- Progress indicator -->
-                <div id="downloadProgress" class="mt-3" style="display: none;">
-                    <div class="d-flex align-items-center">
-                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-                        <span>Sedang memproses unduhan...</span>
-                    </div>
-                </div>
-
-                <!-- Success/Error messages -->
-                <div id="alertContainer" class="mt-3"></div>
-            </div>
-            <div class="modal-footer bg-light">
-                <button class="btn btn-primary" id="downloadBtn" disabled>
-                    <span class="spinner-border spinner-border-sm me-2" role="status" style="display: none;"></span>
-                    Unduh PDF
-                </button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Modal Content Code -->
 <div class="modal fade" tabindex="-1" id="add">
     <form role="form" id="myform" method="post" action="<?= site_url('pelanggan/trx') ?>">
@@ -327,7 +269,126 @@
     </form>
 </div>
 
-<!-- js unduh surat -->
+<!-- Modal Unduh Surat -->
+<div class="modal fade" tabindex="-1" id="unduh-surat">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Unduh Surat Keluar</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Radio buttons untuk pilihan download -->
+                <div class="form-group mb-4">
+                    <label class="form-label">Pilih Metode Download <span class="text-danger">*</span></label>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="download_method" id="method_no_surat" value="no_surat" checked>
+                                <label class="form-check-label" for="method_no_surat">
+                                    <strong>Berdasarkan No. Surat</strong><br>
+                                    <small class="text-muted">Download satu nomor surat tertentu</small>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="download_method" id="method_tanggal" value="tanggal">
+                                <label class="form-check-label" for="method_tanggal">
+                                    <strong>Berdasarkan Rentang Tanggal</strong><br>
+                                    <small class="text-muted">Download per nomor surat dalam rentang tanggal</small>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form untuk No Surat -->
+                <div id="form_no_surat" class="download-form">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-control-wrap">
+                                    <label class="form-label" for="no_surat_select">No Surat <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <select name="no_surat" id="no_surat_select" class="form-select">
+                                            <option selected disabled value="">Pilih No Surat</option>
+                                            <?php foreach ($surat as $s): ?>
+                                                <option value="<?= $s['no_surat'] ?>"><?= $s['no_surat'] . ' | ' . $s['tanggal_keluar'] ?></option>
+                                            <?php endforeach ?>
+                                        </select>
+                                    </div>
+                                    <div class="form-text text-muted">Pilih nomor surat yang ingin diunduh</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Info text untuk no surat -->
+                    <div class="alert alert-info">
+                        <strong>Informasi:</strong><br>
+                        • Pilih nomor surat untuk mengunduh semua data terkait nomor surat tersebut<br>
+                        • File akan diunduh dalam format PDF<br>
+                        • Semua item dalam satu nomor surat akan menjadi satu dokumen PDF
+                    </div>
+                </div>
+
+                <!-- Form untuk Rentang Tanggal -->
+                <div id="form_tanggal" class="download-form" style="display: none;">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-control-wrap">
+                                    <label class="form-label" for="tanggal_mulai">Tanggal Mulai <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <input type="date" name="tanggal_mulai" id="tanggal_mulai" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-control-wrap">
+                                    <label class="form-label" for="tanggal_selesai">Tanggal Selesai <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <input type="date" name="tanggal_selesai" id="tanggal_selesai" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Info text untuk tanggal -->
+                    <div class="alert alert-info">
+                        <strong>Informasi:</strong><br>
+                        • Pilih rentang tanggal untuk mengunduh semua surat dalam periode tersebut<br>
+                        • Setiap nomor surat akan menjadi halaman/dokumen terpisah dalam satu file PDF<br>
+                        • File akan diunduh dalam format PDF<br>
+                        • Dokumen akan diurutkan berdasarkan tanggal dan nomor surat
+                    </div>
+                </div>
+
+                <!-- Progress indicator -->
+                <div id="downloadProgress" class="mt-3" style="display: none;">
+                    <div class="d-flex align-items-center">
+                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                        <span>Sedang memproses unduhan...</span>
+                    </div>
+                </div>
+
+                <!-- Success/Error messages -->
+                <div id="alertContainer" class="mt-3"></div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button class="btn btn-primary" id="downloadBtn" disabled>
+                    <span class="spinner-border spinner-border-sm me-2" role="status" style="display: none;"></span>
+                    Unduh PDF
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JS unduh surat -->
 <script>
     $(document).ready(function() {
         // Initialize Select2
@@ -337,36 +398,102 @@
             dropdownParent: $('#unduh-surat')
         });
 
-        // Enable/disable download button based on selection
-        $('#no_surat_select').on('change', function() {
-            const downloadBtn = $('#downloadBtn');
-            if ($(this).val()) {
-                downloadBtn.prop('disabled', false);
-            } else {
-                downloadBtn.prop('disabled', true);
+        // Handle radio button change
+        $('input[name="download_method"]').on('change', function() {
+            const method = $(this).val();
+
+            // Hide all forms
+            $('.download-form').hide();
+
+            // Show selected form
+            if (method === 'no_surat') {
+                $('#form_no_surat').show();
+            } else if (method === 'tanggal') {
+                $('#form_tanggal').show();
             }
+
+            // Reset form validation
+            validateForm();
+        });
+
+        // Validate form inputs
+        function validateForm() {
+            const method = $('input[name="download_method"]:checked').val();
+            const downloadBtn = $('#downloadBtn');
+            let isValid = false;
+
+            if (method === 'no_surat') {
+                isValid = $('#no_surat_select').val() !== null && $('#no_surat_select').val() !== '';
+            } else if (method === 'tanggal') {
+                const tanggalMulai = $('#tanggal_mulai').val();
+                const tanggalSelesai = $('#tanggal_selesai').val();
+                isValid = tanggalMulai !== '' && tanggalSelesai !== '' && tanggalMulai <= tanggalSelesai;
+            }
+
+            downloadBtn.prop('disabled', !isValid);
+        }
+
+        // Enable/disable download button based on selection
+        $('#no_surat_select').on('change', validateForm);
+        $('#tanggal_mulai, #tanggal_selesai').on('change', validateForm);
+
+        // Validate date range
+        $('#tanggal_mulai, #tanggal_selesai').on('change', function() {
+            const tanggalMulai = $('#tanggal_mulai').val();
+            const tanggalSelesai = $('#tanggal_selesai').val();
+
+            if (tanggalMulai && tanggalSelesai && tanggalMulai > tanggalSelesai) {
+                showAlert('error', 'Tanggal mulai tidak boleh lebih besar dari tanggal selesai!');
+                $('#tanggal_selesai').val('');
+            }
+
+            validateForm();
         });
 
         function resetForm() {
+            $('input[name="download_method"][value="no_surat"]').prop('checked', true).trigger('change');
             $('#no_surat_select').val('').trigger('change');
+            $('#tanggal_mulai, #tanggal_selesai').val('');
             $('#alertContainer').empty();
             showProgress(false);
         }
 
         function clearForm() {
-            $('#no_surat_select').val('').trigger('change');
-            $('#alertContainer').empty();
-            showProgress(false);
+            resetForm();
             $('#downloadBtn').prop('disabled', true);
         }
 
         // Handle download button click
         $('#downloadBtn').on('click', function() {
-            const no_surat = $('#no_surat_select').val();
+            const method = $('input[name="download_method"]:checked').val();
+            let requestData = {
+                method: method
+            };
 
-            if (!no_surat) {
-                showAlert('error', 'Silakan pilih nomor surat terlebih dahulu!');
-                return;
+            // Validate based on method
+            if (method === 'no_surat') {
+                const no_surat = $('#no_surat_select').val();
+                if (!no_surat) {
+                    showAlert('error', 'Silakan pilih nomor surat terlebih dahulu!');
+                    return;
+                }
+                requestData.no_surat = no_surat;
+            } else if (method === 'tanggal') {
+                const tanggalMulai = $('#tanggal_mulai').val();
+                const tanggalSelesai = $('#tanggal_selesai').val();
+
+                if (!tanggalMulai || !tanggalSelesai) {
+                    showAlert('error', 'Silakan pilih rentang tanggal terlebih dahulu!');
+                    return;
+                }
+
+                if (tanggalMulai > tanggalSelesai) {
+                    showAlert('error', 'Tanggal mulai tidak boleh lebih besar dari tanggal selesai!');
+                    return;
+                }
+
+                requestData.tanggal_mulai = tanggalMulai;
+                requestData.tanggal_selesai = tanggalSelesai;
             }
 
             // Show progress
@@ -374,11 +501,9 @@
 
             // AJAX request to download
             $.ajax({
-                url: baseUrl + 'keluar/unduhSurat', // Adjust URL as needed
+                url: baseUrl + 'keluar/unduhSurat',
                 type: 'POST',
-                data: {
-                    no_surat: no_surat
-                },
+                data: requestData,
                 dataType: 'json',
                 success: function(response) {
                     showProgress(false);
@@ -421,21 +546,20 @@
                 spinner.show();
             } else {
                 progressDiv.hide();
-                downloadBtn.prop('disabled', !$('#no_surat_select').val());
+                validateForm();
                 spinner.hide();
             }
         }
 
         function showAlert(type, message) {
             const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
-            const iconClass = type === 'success' ? 'check-circle' : 'exclamation-triangle';
 
             const alert = `
-                    <div class="alert ${alertClass} alert-dismissible fade show">
-                        <strong>${type === 'success' ? 'Berhasil!' : 'Error!'}</strong> ${message}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                `;
+                <div class="alert ${alertClass} alert-dismissible fade show">
+                    <strong>${type === 'success' ? 'Berhasil!' : 'Error!'}</strong> ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
 
             $('#alertContainer').html(alert);
 
@@ -450,6 +574,7 @@
     });
 </script>
 
+<!-- js add -->
 <script>
     $(document).ready(function() {
         // Initialize Select2

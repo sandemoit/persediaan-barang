@@ -135,7 +135,7 @@
 
 
 <!-- Add Room-->
-<div class="modal fade" tabindex="-1" role="dialog" id="add">
+<div class="modal fade" tabindex="-1" id="add">
     <div class="modal-dialog modal-md" role="document">
         <div class="modal-content">
             <a href="#" class="close" data-bs-dismiss="modal"><em class="icon ni ni-cross-sm"></em></a>
@@ -164,7 +164,7 @@
                                     <div class="form-group">
                                         <label class="form-label">Barang</label>
                                         <div class="form-control-wrap">
-                                            <select name="barang_id" id="barang_id" data-search="on" class="form-select js-select2">
+                                            <select name="barang_id" id="barang_id" data-search="on" class="form-select select2-barang">
                                                 <option selected disabled>Pilih Barang</option>
                                                 <?php foreach ($barang as $key) : ?>
                                                     <option <?= set_select('barang_id', $key['kode_barang']) ?> data-stok="<?= $key['stok']; ?>" value="<?= $key['kode_barang'] ?>"><?= $key['kode_barang'] . ' | ' . $key['nama_barang'] ?></option>
@@ -214,7 +214,7 @@
                         <div class="form-group">
                             <label class="form-label">Supplier</label>
                             <div class="form-control-wrap">
-                                <select name="id_supplier" id="id_supplier" data-search="on" class="form-select js-select2">
+                                <select name="id_supplier" id="id_supplier" data-search="on" class="form-select select2-supplier">
                                     <option selected disabled>Pilih Supplier</option>
                                     <?php foreach ($supplier as $s) : ?>
                                         <option value="<?= $s['id']; ?>"><?= $s['nama_supplier']; ?></option>
@@ -239,6 +239,18 @@
         </div><!-- .modal-content -->
     </div><!-- .modal-dialog -->
 </div><!-- .modal -->
+<script>
+    $('.select2-supplier').select2({
+        placeholder: "Pilih Supplier",
+        allowClear: true,
+        dropdownParent: $('#add')
+    });
+    $('.select2-barang').select2({
+        placeholder: "Pilih Barang",
+        allowClear: true,
+        dropdownParent: $('#add')
+    });
+</script>
 
 <!-- <script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
 <script src="<?= base_url('assets') ?>/js/custom/scanqr.js"></script> -->
