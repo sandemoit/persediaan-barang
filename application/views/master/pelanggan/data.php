@@ -80,13 +80,14 @@
     </div>
 </div>
 <!-- content @e -->
+
 <!-- Add Room-->
 <div class="modal fade" tabindex="-1" role="dialog" id="add">
     <div class="modal-dialog modal-md" role="document">
         <div class="modal-content">
             <a href="#" class="close" data-bs-dismiss="modal"><em class="icon ni ni-cross-sm"></em></a>
             <div class="modal-body modal-body-md">
-                <h5 class="modal-title">Tambah user</h5>
+                <h5 class="modal-title">Tambah pelanggan</h5>
                 <form action="<?= site_url('pelanggan') ?>" method="POST" class="mt-2">
                     <div class="row g-gs">
                         <div class="col">
@@ -95,7 +96,7 @@
                                 <input type="text" class="form-control" name="nama" id="nama" placeholder="Nama">
                             </div>
                             <div class="form-group">
-                                <label class="form-label" for="room-no-add">Kode Toko</label>
+                                <label class="form-label" for="room-no-add">Kode Area</label>
                                 <input type="text" class="form-control" name="kode_toko" id="kode_toko" placeholder="TK123****">
                             </div>
                             <div class="form-group">

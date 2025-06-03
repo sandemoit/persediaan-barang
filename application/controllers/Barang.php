@@ -117,6 +117,7 @@ class Barang extends CI_Controller
             'id_jenis' => $this->input->post('id_jenis'),
             'id_satuan' => $this->input->post('id_satuan'),
             'id_supplier' => $this->input->post('id_supplier'),
+            'harga' => $this->input->post('harga'),
             'date_update' => date('Y-m-d H:i:s')
         ];
 

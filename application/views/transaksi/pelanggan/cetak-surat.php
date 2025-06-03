@@ -19,7 +19,7 @@
 
         body {
             font-family: 'DejaVu Sans', Arial, sans-serif;
-            font-size: 11px;
+            font-size: 8px;
             line-height: 1.3;
             color: #000;
         }
@@ -54,7 +54,7 @@
         }
 
         .company-info h3 {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
             margin-bottom: 6px;
         }
@@ -68,7 +68,7 @@
         }
 
         .card-title h2 {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
             margin-bottom: 4px;
         }
@@ -105,7 +105,7 @@
             width: 100%;
             border-collapse: collapse;
             margin: 10px 0;
-            font-size: 11px;
+            font-size: 8px;
         }
 
         .data-table th {
@@ -114,12 +114,12 @@
             padding: 8px 4px;
             border: 1px solid #000;
             text-align: center;
-            font-size: 11px;
+            font-size: 8px;
         }
 
         .data-table td {
             border: 1px solid #000;
-            padding: 6px 4px;
+            padding: 4px 4px;
             text-align: left;
             vertical-align: middle;
         }
@@ -158,9 +158,7 @@
         }
 
         .note {
-            font-size: 10px;
-            margin: 12px 0;
-            padding: 8px 0;
+            font-size: 8px;
             border-bottom: 1px solid #000;
             text-align: left;
         }
@@ -177,12 +175,12 @@
             padding: 5px;
             text-align: center;
             width: 25%;
-            font-size: 11px;
+            font-size: 8px;
             vertical-align: top;
         }
 
         .signature-title {
-            margin-bottom: 35px;
+            margin-bottom: 55px;
             font-weight: bold;
         }
 
@@ -228,6 +226,7 @@
                 <td class="recipient-info">
                     <strong>Tanggal:</strong> <?= $generated_date ?><br />
                     <strong>Kepada:</strong> <?= $nama_pelanggan ?><br />
+                    <strong>Area:</strong> <?= $area ?><br />
                     <?php if (!empty($alamat_pelanggan)): ?>
                         <strong>Alamat:</strong> <?= $alamat_pelanggan ?>
                     <?php endif ?>
